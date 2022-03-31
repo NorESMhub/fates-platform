@@ -18,6 +18,10 @@
     "resolveJsonModule": false,
     "noEmit": true,
     "jsx": "react",
+    "types": [
+      "react/next",
+      "react-dom/next"
+    ],
     "sourceMap": true,
     "declaration": true,
     "noUnusedLocals": true,

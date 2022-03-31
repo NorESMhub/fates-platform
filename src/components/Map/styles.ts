@@ -1,5 +1,3 @@
-import { themeOptions } from '../../theme';
-
 const basemapSource: maplibregl.RasterSourceSpecification = {
     type: 'raster',
     tiles: ['//server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}'],
@@ -21,17 +19,9 @@ export const layerStyles: { [group: string]: { [state: string]: Partial<maplibre
         default: {
             type: 'circle',
             paint: {
-                'circle-radius': 7,
-                'circle-color': themeOptions.palette.primary.dark,
-                'circle-opacity': 0.9
-            }
-        },
-        selected: {
-            type: 'circle',
-            paint: {
-                'circle-radius': 10,
-                'circle-color': themeOptions.palette.secondary.dark,
-                'circle-opacity': 1
+                'circle-radius': ['case', ['boolean', ['feature-state', 'selected'], false], 10, 7],
+                'circle-color': ['case', ['boolean', ['feature-state', 'selected'], false], '#ff0000', '#002e2c'],
+                'circle-opacity': ['case', ['boolean', ['feature-state', 'selected'], false], 0.5, 1]
             }
         }
     }

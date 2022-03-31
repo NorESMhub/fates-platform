@@ -1,5 +1,7 @@
 import { createTheme } from '@mui/material/styles';
 
+export const HEADER_HEIGHT = 64;
+
 export const themeOptions = {
     palette: {
         primary: {
