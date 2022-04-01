@@ -1,42 +1,34 @@
 import React from 'react';
+import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
-
-import type { SxProps } from '@mui/material/styles';
+import Chip from '@mui/material/Chip';
+import Divider from '@mui/material/Divider';
+import Typography from '@mui/material/Typography';
 
 import { StateContext } from '../store';
 import { HEADER_HEIGHT } from '../theme';
 import Header from './Header';
 import Map from './Map';
-import Sidebar from './Sidebar';
 import { layerStyles, mapStyle } from './Map/styles';
-
-const styles: { [k: string]: SxProps } = {
-    header: {},
-    content: {
-        display: 'flex',
-        height: `calc(100% - ${HEADER_HEIGHT}px)`
-    },
-    sidebar: {
-        width: '34%',
-        display: 'flex',
-        flexDirection: 'column',
-        m: 1
-    },
-    map: {
-        flex: 1
-    }
-};
+import SiteDetails from './SiteDetails';
+import SiteCases from './SiteCases';
 
 interface Refs {
     map?: maplibregl.Map;
     bounds: maplibregl.LngLatBoundsLike;
     selectedSite?: SiteProps;
+    hoveredSite?: string;
 }
 
 const Home = (): JSX.Element => {
     const { state, dispatch } = React.useContext(StateContext);
 
-    const refs = React.useRef<Refs>({ map: undefined, bounds: state.sitesBounds, selectedSite: undefined });
+    const refs = React.useRef<Refs>({
+        map: undefined,
+        bounds: state.sitesBounds,
+        selectedSite: undefined,
+        hoveredSite: undefined
+    });
 
     const sitesBounds = React.useRef(state.sitesBounds);
 
@@ -67,15 +59,13 @@ const Home = (): JSX.Element => {
         } as maplibregl.CircleLayerSpecification);
 
         map.on('click', 'sites', (e) => {
-            if (e.features && e.features[0]) {
-                if (e.features.length > 0) {
-                    const site =
-                        e.features[0].id === refs.current.selectedSite?.name ? undefined : e.features[0].properties;
-                    dispatch({
-                        type: 'updateSelectedSite',
-                        site
-                    });
-                }
+            if (e.features && e.features.length > 0) {
+                const site =
+                    e.features[0].id === refs.current.selectedSite?.name ? undefined : e.features[0].properties;
+                dispatch({
+                    type: 'updateSelectedSite',
+                    site
+                });
             }
         });
 
@@ -91,29 +81,86 @@ const Home = (): JSX.Element => {
         refs.current.map = map;
     };
 
+    const handleSiteClick = (site: SiteProps) => {
+        dispatch({ type: 'updateSelectedSite', site });
+        handleSiteMouseLeave();
+    };
+
+    const handleSiteMouseEnter = (siteId: string) => {
+        if (refs.current.map) {
+            if (refs.current.hoveredSite) {
+                refs.current.map.setFeatureState({ source: 'sites', id: refs.current.hoveredSite }, { hovered: false });
+            }
+            refs.current.map.setFeatureState({ source: 'sites', id: siteId }, { hovered: true });
+            refs.current.hoveredSite = siteId;
+        }
+    };
+
+    const handleSiteMouseLeave = () => {
+        if (refs.current.map) {
+            if (refs.current.hoveredSite) {
+                refs.current.map.setFeatureState({ source: 'sites', id: refs.current.hoveredSite }, { hovered: false });
+                refs.current.hoveredSite = undefined;
+            }
+        }
+    };
+
     return (
         <>
             <Header />
 
-            <Box sx={styles.content}>
-                <Box sx={styles.sidebar}>
-                    <Sidebar />
+            <Box
+                sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    height: `calc(100% - ${HEADER_HEIGHT}px)`
+                }}
+            >
+                <Box sx={{ display: 'flex', height: '50%' }}>
+                    <Box sx={{ width: '50%', overflowY: 'auto', p: 1 }}>
+                        {state.selectedSite ? (
+                            <SiteDetails site={state.selectedSite} />
+                        ) : (
+                            <>
+                                <Typography variant="h4">Sites</Typography>
+                                <Alert sx={{ m: 1 }} severity="info">
+                                    Start by selecting a site from the list below or on the map.
+                                </Alert>
+                                {state.sites &&
+                                    state.sites.features.map(({ properties }) => (
+                                        <Chip
+                                            key={properties.name}
+                                            sx={{ m: 1 }}
+                                            label={properties.name}
+                                            variant="outlined"
+                                            onClick={() => handleSiteClick(properties)}
+                                            onMouseEnter={() => handleSiteMouseEnter(properties.name)}
+                                            onMouseLeave={handleSiteMouseLeave}
+                                        />
+                                    ))}
+                            </>
+                        )}
+                    </Box>
+                    <Box sx={{ flexGrow: 1 }}>
+                        <Map
+                            mapOptions={{
+                                style: mapStyle,
+                                minZoom: 1,
+                                fitBoundsOptions: {
+                                    padding: 100
+                                }
+                            }}
+                            initialBounds={sitesBounds.current}
+                            attribution
+                            help
+                            navigation
+                            onLoad={onMapLoad}
+                        />
+                    </Box>
                 </Box>
-                <Box sx={styles.map}>
-                    <Map
-                        mapOptions={{
-                            style: mapStyle,
-                            minZoom: 1,
-                            fitBoundsOptions: {
-                                padding: 100
-                            }
-                        }}
-                        initialBounds={sitesBounds.current}
-                        attribution
-                        help
-                        navigation
-                        onLoad={onMapLoad}
-                    />
+                <Divider />
+                <Box sx={{ flexGrow: 1, p: 1 }}>
+                    {state.selectedSite ? <SiteCases site={state.selectedSite} /> : null}
                 </Box>
             </Box>
         </>

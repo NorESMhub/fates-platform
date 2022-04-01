@@ -60,7 +60,7 @@ const Map = ({ mapOptions, initialBounds, attribution, help, navigation, onLoad 
     }, []);
 
     return (
-        <Box ref={mapContainerRef} sx={{ height: '100%', width: '100%', flexGrow: 1, background: 'white' }}>
+        <Box ref={mapContainerRef} sx={{ height: '100%', width: '100%' }}>
             {maplibre.supported() ? null : 'Your browser does not support the map features.'}
 
             {navigation ? (

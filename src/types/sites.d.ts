@@ -32,7 +32,7 @@ interface Case {
     data_url: string;
     ctsm_tag: string;
     status: CaseStatus;
-    date_created: Date;
+    date_created: string;
     task_id?: string;
 }
 

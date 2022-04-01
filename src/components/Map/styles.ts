@@ -19,9 +19,30 @@ export const layerStyles: { [group: string]: { [state: string]: Partial<maplibre
         default: {
             type: 'circle',
             paint: {
-                'circle-radius': ['case', ['boolean', ['feature-state', 'selected'], false], 10, 7],
-                'circle-color': ['case', ['boolean', ['feature-state', 'selected'], false], '#ff0000', '#002e2c'],
-                'circle-opacity': ['case', ['boolean', ['feature-state', 'selected'], false], 0.5, 1]
+                'circle-radius': [
+                    'case',
+                    ['boolean', ['feature-state', 'selected'], false],
+                    10,
+                    ['boolean', ['feature-state', 'hovered'], false],
+                    10,
+                    7
+                ],
+                'circle-color': [
+                    'case',
+                    ['boolean', ['feature-state', 'selected'], false],
+                    '#ff0000',
+                    ['boolean', ['feature-state', 'hovered'], false],
+                    '#a06f35',
+                    '#002e2c'
+                ],
+                'circle-opacity': [
+                    'case',
+                    ['boolean', ['feature-state', 'selected'], false],
+                    0.5,
+                    ['boolean', ['feature-state', 'hovered'], false],
+                    0.5,
+                    1
+                ]
             }
         }
     }

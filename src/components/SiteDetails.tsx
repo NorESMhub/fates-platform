@@ -1,16 +1,11 @@
-import axios from 'axios';
 import React from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 
+import { StateContext } from '../store';
 import CaseCreate from './CaseCreate';
 
 interface Props {
@@ -18,17 +13,35 @@ interface Props {
 }
 
 const SiteDetails = ({ site }: Props) => {
-    const [cases, updatedCases] = React.useState<CaseWithTaskInfo[]>([]);
+    const { dispatch } = React.useContext(StateContext);
     const [editCase, updatedEditCase] = React.useState(false);
-
-    React.useEffect(() => {
-        axios.get(`${API_PATH}/sites/${site.name}/cases`).then(({ data }) => {
-            updatedCases(data);
-        });
-    }, []);
 
     return (
         <>
+            <Box sx={{ display: 'flex', justifyContent: 'space-evenly' }}>
+                <Button
+                    color="secondary"
+                    variant="outlined"
+                    onClick={() => dispatch({ type: 'updateSelectedSite', site: undefined })}
+                >
+                    Back
+                </Button>
+                <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'end' }}>
+                    <Button component="a" href={site.url} variant="outlined">
+                        Download Site Data
+                    </Button>
+                    <Button
+                        sx={{ ml: 1 }}
+                        variant="outlined"
+                        color="primary"
+                        disabled={editCase}
+                        onClick={() => updatedEditCase(true)}
+                    >
+                        Create Case
+                    </Button>
+                </Box>
+            </Box>
+
             <Card sx={{ m: 1 }} elevation={0}>
                 <CardContent>
                     <Box sx={{ mb: 1 }}>
@@ -51,44 +64,9 @@ const SiteDetails = ({ site }: Props) => {
                             {site.res}
                         </Typography>
                     </Box>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-evenly', mb: 1 }}>
-                        <Button component="a" href={site.url} variant="outlined">
-                            Download Site Data
-                        </Button>
-                        <Button
-                            variant="outlined"
-                            color="primary"
-                            disabled={editCase}
-                            onClick={() => updatedEditCase(true)}
-                        >
-                            Create Case
-                        </Button>
-                    </Box>
                 </CardContent>
             </Card>
-            {editCase ? (
-                <CaseCreate onClose={() => updatedEditCase(false)} />
-            ) : (
-                <Box sx={{ m: 1 }}>
-                    <Typography variant="body1">Cases:</Typography>
-                    <Table>
-                        <TableHead>
-                            <TableCell>Case ID</TableCell>
-                            <TableCell>Date Created</TableCell>
-                            <TableCell>Status</TableCell>
-                        </TableHead>
-                        <TableBody>
-                            {cases.map((caseInfo) => (
-                                <TableRow key={caseInfo.task_id}>
-                                    <TableCell>{caseInfo.id}</TableCell>
-                                    <TableCell>{caseInfo.date_created}</TableCell>
-                                    <TableCell>{caseInfo.status}</TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </Box>
-            )}
+            <CaseCreate open={editCase} onClose={() => updatedEditCase(false)} />
         </>
     );
 };
