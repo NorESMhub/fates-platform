@@ -2,7 +2,8 @@ interface State {
     sites?: Sites;
     sitesBounds: maplibregl.LngLatBoundsLike;
     selectedSite?: SiteProps;
-    allowedVars: string[];
+    selectedSiteCases?: CaseWithTaskInfo[];
+    allowedVars: CTSMAllowedVars[];
 }
 
 interface UpdateSites {
@@ -15,12 +16,17 @@ interface UpdateSelectedSite {
     site?: SiteProps;
 }
 
-interface UpdateAllowedVars {
-    type: 'updateAllowedVars';
-    vars: string[];
+interface UpdateSelectedSiteCases {
+    type: 'updateSelectedSiteCases';
+    cases?: CaseWithTaskInfo[];
 }
 
-type Action = UpdateSites | UpdateSelectedSite | UpdateAllowedVars;
+interface UpdateAllowedVars {
+    type: 'updateAllowedVars';
+    vars: CTSMAllowedVars[];
+}
+
+type Action = UpdateSites | UpdateSelectedSite | UpdateSelectedSiteCases | UpdateAllowedVars;
 
 interface StoreContext {
     state: State;

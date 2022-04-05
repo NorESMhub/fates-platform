@@ -3,11 +3,13 @@ import React, { Suspense, StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { StyledEngineProvider, ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
+import DateFnsAdapter from '@mui/lab/AdapterDateFns';
+import LocalizationProvider from '@mui/lab/LocalizationProvider';
 
 import { StateContext, initialState, reducers } from './store';
 import { theme } from './theme';
-import Home from './components/Home';
-import Loading from './components/Loading';
+import Content from './components/Main/Content';
+import Loading from './components/Main/Loading';
 
 const App = (): JSX.Element => {
     const [state, dispatch] = React.useReducer(reducers, initialState);
@@ -34,14 +36,16 @@ const App = (): JSX.Element => {
 
     return (
         <StrictMode>
-            <CssBaseline />
-            <StyledEngineProvider injectFirst>
-                <ThemeProvider theme={theme}>
-                    <StateContext.Provider value={stateContextValue}>
-                        <Suspense fallback={<Loading />}>{state.sites ? <Home /> : <Loading />}</Suspense>
-                    </StateContext.Provider>
-                </ThemeProvider>
-            </StyledEngineProvider>
+            <LocalizationProvider dateAdapter={DateFnsAdapter}>
+                <CssBaseline />
+                <StyledEngineProvider injectFirst>
+                    <ThemeProvider theme={theme}>
+                        <StateContext.Provider value={stateContextValue}>
+                            <Suspense fallback={<Loading />}>{state.sites ? <Content /> : <Loading />}</Suspense>
+                        </StateContext.Provider>
+                    </ThemeProvider>
+                </StyledEngineProvider>
+            </LocalizationProvider>
         </StrictMode>
     );
 };

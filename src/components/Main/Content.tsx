@@ -5,13 +5,13 @@ import Chip from '@mui/material/Chip';
 import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
 
-import { StateContext } from '../store';
-import { HEADER_HEIGHT } from '../theme';
+import { StateContext } from '../../store';
+import { HEADER_HEIGHT } from '../../theme';
 import Header from './Header';
-import Map from './Map';
-import { layerStyles, mapStyle } from './Map/styles';
-import SiteDetails from './SiteDetails';
-import SiteCases from './SiteCases';
+import Map from '../Map';
+import { layerStyles, mapStyle } from '../Map/styles';
+import SiteDetails from '../Site/Details';
+import CasesList from '../Case/List';
 
 interface Refs {
     map?: maplibregl.Map;
@@ -20,7 +20,7 @@ interface Refs {
     hoveredSite?: string;
 }
 
-const Home = (): JSX.Element => {
+const Content = (): JSX.Element => {
     const { state, dispatch } = React.useContext(StateContext);
 
     const refs = React.useRef<Refs>({
@@ -160,11 +160,11 @@ const Home = (): JSX.Element => {
                 </Box>
                 <Divider />
                 <Box sx={{ flexGrow: 1, p: 1 }}>
-                    {state.selectedSite ? <SiteCases site={state.selectedSite} /> : null}
+                    {state.selectedSite ? <CasesList site={state.selectedSite} /> : null}
                 </Box>
             </Box>
         </>
     );
 };
 
-export default Home;
+export default Content;

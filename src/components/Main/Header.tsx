@@ -3,7 +3,7 @@ import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 
-import { HEADER_HEIGHT } from '../theme';
+import { HEADER_HEIGHT } from '../../theme';
 
 const Header = () => (
     <AppBar
