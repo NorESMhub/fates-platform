@@ -15,7 +15,7 @@ interface CTSMAllowedVars {
     default?: string | number | boolean;
 }
 
-type CaseStatus = 'INITIALISED' | 'CREATED' | 'UPDATED' | 'SETUP' | 'BUILT' | 'SUBMITTED' | 'SUCCEEDED' | 'FAILED';
+type CaseStatus = 'INITIALISED' | 'CREATED' | 'UPDATED' | 'SETUP' | 'BUILT' | 'SUBMITTED';
 
 interface Case {
     id: string;

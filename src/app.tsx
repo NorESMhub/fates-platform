@@ -23,13 +23,13 @@ const App = (): JSX.Element => {
 
     React.useEffect(() => {
         axios
-            .get(`${API_PATH}/sites`)
+            .get<Sites>(`${API_PATH}/sites`)
             .then(({ data }) => {
                 dispatch({ type: 'updateSites', sites: data });
             })
             .catch(console.error);
 
-        axios.get(`${API_PATH}/cases/allowed_vars`).then(({ data }) => {
+        axios.get<CTSMAllowedVars[]>(`${API_PATH}/cases/allowed_vars`).then(({ data }) => {
             dispatch({ type: 'updateAllowedVars', vars: data });
         });
     }, []);
