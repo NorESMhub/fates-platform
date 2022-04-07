@@ -39,7 +39,7 @@ const CaseDelete = ({ caseInfo, handleClose }: Props) => {
     };
 
     return (
-        <Dialog fullWidth maxWidth={false} open onClose={handleClose}>
+        <Dialog open fullWidth maxWidth={false} onClose={handleClose}>
             <DialogTitle>Delete the following case?</DialogTitle>
             <DialogContent dividers>
                 {errors ? (
@@ -56,13 +56,13 @@ const CaseDelete = ({ caseInfo, handleClose }: Props) => {
                 <Typography variant="body1">Compset: {caseInfo.compset}</Typography>
                 <Typography variant="body1">Variables:</Typography>
                 <List dense disablePadding>
-                    {Object.entries(caseInfo.variables).map(([variable, value]) => (
-                        <ListItem key={variable} disableGutters disablePadding>
+                    {caseInfo.variables.map((variable) => (
+                        <ListItem key={variable.name} disableGutters disablePadding>
                             <ListItemText
                                 sx={{ display: 'flex' }}
-                                primary={`${variable}:`}
+                                primary={`${variable.name}:`}
                                 primaryTypographyProps={{ sx: { mr: 1 }, variant: 'caption' }}
-                                secondary={value}
+                                secondary={variable.value}
                                 secondaryTypographyProps={{ component: 'span', variant: 'subtitle2' }}
                                 inset
                             />

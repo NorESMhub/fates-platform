@@ -29,7 +29,7 @@ const App = (): JSX.Element => {
             })
             .catch(console.error);
 
-        axios.get<CTSMAllowedVars[]>(`${API_PATH}/cases/allowed_vars`).then(({ data }) => {
+        axios.get<CaseAllowedVariable[]>(`${API_PATH}/cases/allowed_vars`).then(({ data }) => {
             dispatch({ type: 'updateAllowedVars', vars: data });
         });
     }, []);

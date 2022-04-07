@@ -6,6 +6,7 @@ import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import Icon from '@mui/material/Icon';
+import IconButton from '@mui/material/IconButton';
 import Link from '@mui/material/Link';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
@@ -96,9 +97,22 @@ const CaseListRow = ({ caseInfo, handleEdit, handleDelete }: Props) => {
                 <Typography component="span" variant="caption">
                     Failed
                 </Typography>
-                <Icon baseClassName="icons" fontSize="small" color="error">
-                    error_outline
-                </Icon>
+                <IconButton
+                    size="small"
+                    onClick={(e) =>
+                        dispatch({
+                            type: 'updatePopover',
+                            popover: {
+                                anchor: e.currentTarget,
+                                text: caseInfo.task.error
+                            }
+                        })
+                    }
+                >
+                    <Icon baseClassName="icons" fontSize="small" color="error">
+                        error_outline
+                    </Icon>
+                </IconButton>
             </>
         );
     } else if (caseInfo.task.status === 'SUCCESS') {
@@ -178,17 +192,20 @@ const CaseListRow = ({ caseInfo, handleEdit, handleDelete }: Props) => {
                     </Stack>
                 </TableCell>
             </TableRow>
-            <Dialog open={showVariables} fullWidth onClose={() => updateShowVariables(false)}>
+            <Dialog open={showVariables} fullWidth maxWidth={false} onClose={() => updateShowVariables(false)}>
                 <DialogTitle>Variables</DialogTitle>
                 <DialogContent>
                     <List dense disablePadding>
-                        {state.allowedVars.map((variable) => (
-                            <ListItem key={variable.name}>
+                        {state.allowedVars.map((allowedVar) => (
+                            <ListItem key={allowedVar.name}>
                                 <ListItemText
                                     sx={{ pl: 0, display: 'flex' }}
-                                    primary={`${variable.name}:`}
+                                    primary={`${allowedVar.name}:`}
                                     primaryTypographyProps={{ sx: { mr: 1 }, variant: 'caption' }}
-                                    secondary={caseInfo.variables[variable.name] || variable.default}
+                                    secondary={
+                                        caseInfo.variables.find((v) => v.name === allowedVar.name)?.value ||
+                                        allowedVar.default
+                                    }
                                     secondaryTypographyProps={{ component: 'span', variant: 'subtitle2' }}
                                     inset
                                 />

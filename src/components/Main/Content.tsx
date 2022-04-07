@@ -3,6 +3,10 @@ import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
 import Divider from '@mui/material/Divider';
+import Icon from '@mui/material/Icon';
+import Link from '@mui/material/Link';
+import Popover from '@mui/material/Popover';
+import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
 import { StateContext } from '../../store';
@@ -159,10 +163,35 @@ const Content = (): JSX.Element => {
                     </Box>
                 </Box>
                 <Divider />
-                <Box sx={{ flexGrow: 1, p: 1 }}>
+                <Box sx={{ flexGrow: 1, p: 1, overflow: 'auto' }}>
                     {state.selectedSite ? <CasesList site={state.selectedSite} /> : null}
                 </Box>
             </Box>
+            <Popover
+                open={Boolean(state.popover.anchor)}
+                disableRestoreFocus
+                anchorEl={state.popover.anchor}
+                anchorOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right'
+                }}
+                transformOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left'
+                }}
+                onClose={() => dispatch({ type: 'updatePopover', popover: {} })}
+            >
+                <Stack sx={{ p: 1, maxWidth: 300 }} direction="row" alignItems="center" spacing={1}>
+                    <Typography variant="caption">{state.popover.text}</Typography>
+                    {state.popover?.url ? (
+                        <Link href={state.popover?.url} target="_blank" rel="noopener,noreferrer">
+                            <Icon baseClassName="icons" fontSize="small">
+                                launch
+                            </Icon>
+                        </Link>
+                    ) : null}
+                </Stack>
+            </Popover>
         </>
     );
 };

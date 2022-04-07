@@ -6,13 +6,24 @@ interface CTSMVars {
     [key: string]: CTSMVarValue | undefined;
 }
 
-interface CTSMAllowedVars {
-    name: string;
-    type: CTSMVarType;
+interface VariableValidation {
+    min?: number;
+    max?: number;
+    pattern?: string;
     choices?: Array<string | number>;
-    allow_multiple: boolean;
+    allow_multiple?: boolean;
+}
+
+type VariableCategory = 'ctsm_xml' | 'ctsm_nl_lnd' | 'fates';
+
+interface CaseAllowedVariable {
+    name: string;
+    category: VariableCategory;
+    type: CTSMVarType;
+    validation?: VariableValidation;
     description?: string;
-    default?: string | number | boolean;
+    default?: CTSMVarValue;
+    value?: CTSMVarValue;
 }
 
 type CaseStatus = 'INITIALISED' | 'CREATED' | 'UPDATED' | 'SETUP' | 'BUILT' | 'SUBMITTED';
@@ -21,13 +32,19 @@ interface Case {
     id: string;
     compset: string;
     res: string;
-    variables: CTSMVars;
+    variables: CaseAllowedVars[];
     driver: 'mct' | 'nuopc';
     data_url: string;
     ctsm_tag: string;
     status: CaseStatus;
     date_created: string;
     task_id?: string;
+}
+
+interface CaseEditPayload {
+    site_name: string;
+    variables: CaseAllowedVariable[];
+    driver: 'mct' | 'nuopc';
 }
 
 type TaskStatus =

@@ -2,8 +2,6 @@ import axios from 'axios';
 import React from 'react';
 import Icon from '@mui/material/Icon';
 import IconButton from '@mui/material/IconButton';
-import Link from '@mui/material/Link';
-import Popover from '@mui/material/Popover';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -23,12 +21,6 @@ interface Props {
 
 const SiteList = ({ site }: Props) => {
     const { state, dispatch } = React.useContext(StateContext);
-
-    const [columnInfoProps, updateColumnInfoProps] = React.useState<{
-        anchor?: HTMLElement;
-        text?: string;
-        url?: string;
-    }>({});
 
     const [editCase, updatedEditCase] = React.useState<CaseWithTaskInfo | null>(null);
     const [deleteCase, updatedDeleteCase] = React.useState<CaseWithTaskInfo | null>(null);
@@ -63,10 +55,13 @@ const SiteList = ({ site }: Props) => {
                                         <IconButton
                                             size="small"
                                             onClick={(e) =>
-                                                updateColumnInfoProps({
-                                                    anchor: e.currentTarget,
-                                                    text: description.text,
-                                                    url: description.url
+                                                dispatch({
+                                                    type: 'updatePopover',
+                                                    popover: {
+                                                        anchor: e.currentTarget,
+                                                        text: description.text,
+                                                        url: description.url
+                                                    }
                                                 })
                                             }
                                         >
@@ -92,33 +87,8 @@ const SiteList = ({ site }: Props) => {
                     ))}
                 </TableBody>
             </Table>
-            <Popover
-                open={Boolean(columnInfoProps.anchor)}
-                disableRestoreFocus
-                anchorEl={columnInfoProps.anchor}
-                anchorOrigin={{
-                    vertical: 'top',
-                    horizontal: 'right'
-                }}
-                transformOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
-                }}
-                onClose={() => updateColumnInfoProps({})}
-            >
-                <Stack sx={{ p: 1, maxWidth: 300 }} direction="row" alignItems="center" spacing={1}>
-                    <Typography variant="caption">{columnInfoProps.text}</Typography>
-                    {columnInfoProps.url ? (
-                        <Link href={columnInfoProps.url} target="_blank" rel="noopener,noreferrer">
-                            <Icon baseClassName="icons" fontSize="small">
-                                launch
-                            </Icon>
-                        </Link>
-                    ) : null}
-                </Stack>
-            </Popover>
             {editCase ? (
-                <CaseEdit initialVariables={editCase.variables || {}} handleClose={() => updatedEditCase(null)} />
+                <CaseEdit initialVariables={editCase.variables || []} handleClose={() => updatedEditCase(null)} />
             ) : null}
             {deleteCase ? <CaseDelete caseInfo={deleteCase} handleClose={() => updatedDeleteCase(null)} /> : null}
         </>

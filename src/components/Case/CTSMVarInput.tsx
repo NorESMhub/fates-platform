@@ -9,26 +9,26 @@ import TextField from '@mui/material/TextField';
 import DatePicker from '@mui/lab/DatePicker';
 
 interface Props {
-    variable: CTSMAllowedVars;
+    variable: CaseAllowedVariable;
     value?: CTSMVarValue;
     onChange: (value?: CTSMVarValue) => void;
 }
 
 const CTSMVarInput = ({ variable, value, onChange }: Props) => {
-    if (variable.choices) {
+    if (variable.validation?.choices) {
         return (
             <FormControl size="small" margin="normal">
                 <Autocomplete
-                    multiple={variable.allow_multiple}
-                    options={variable.choices}
-                    disableCloseOnSelect
+                    multiple={variable.validation.allow_multiple}
+                    options={variable.validation.choices}
+                    disableCloseOnSelect={variable.validation.allow_multiple}
                     filterSelectedOptions
                     renderInput={(params) => (
                         <TextField {...params} size="small" margin="dense" label={variable.name} />
                     )}
                     value={
                         value ||
-                        (variable.allow_multiple && !Array.isArray(variable.default)
+                        (variable.validation.allow_multiple && !Array.isArray(variable.default)
                             ? [variable.default]
                             : variable.default)
                     }

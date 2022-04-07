@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import React from 'react';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
@@ -12,14 +12,14 @@ import { StateContext } from '../../store';
 import CTSMVarInput from './CTSMVarInput';
 
 interface Props {
-    initialVariables: CTSMVars;
+    initialVariables: CaseAllowedVariable[];
     handleClose: () => void;
 }
 
 const CaseEdit = ({ initialVariables, handleClose }: Props) => {
     const { state, dispatch } = React.useContext(StateContext);
 
-    const [variables, updateVariables] = React.useState<CTSMVars>(initialVariables);
+    const [variables, updateVariables] = React.useState<CaseAllowedVariable[]>(initialVariables);
 
     const [errors, updateErrors] = React.useState<string>('');
 
@@ -27,15 +27,39 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
         updateVariables(initialVariables);
     }, [initialVariables]);
 
-    const handleVarChange = (key: string, value?: CTSMVarValue) => {
-        updateVariables({ ...variables, [key]: value });
+    const handleVarChange = (name: string, value?: CTSMVarValue) => {
+        const varIdx = variables.findIndex((v) => v.name === name);
+        if (varIdx === -1) {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            updateVariables([...variables, { ...state.allowedVars.find((v) => v.name === name)!, value }]);
+        } else {
+            updateVariables([
+                ...variables.slice(0, varIdx),
+                {
+                    ...variables[varIdx],
+                    value
+                },
+                ...variables.slice(varIdx + 1)
+            ]);
+        }
     };
 
     const handleSubmit = () => {
+        const preparedVariables: CaseAllowedVariable[] = [];
+        state.allowedVars.forEach((allowedVar) => {
+            const variable = variables.find((v) => v.name === allowedVar.name);
+            if (variable !== undefined && variable.value !== undefined) {
+                preparedVariables.push({
+                    ...allowedVar,
+                    value: variable.value
+                });
+            }
+        });
         axios
-            .post(`${API_PATH}/sites`, {
-                site_name: state.selectedSite?.name,
-                variables,
+            .post<CaseWithTaskInfo, AxiosResponse<CaseWithTaskInfo>, CaseEditPayload>(`${API_PATH}/sites`, {
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                site_name: state.selectedSite!.name,
+                variables: preparedVariables,
                 driver: 'mct'
             })
             .then(({ data }) => {
@@ -63,12 +87,12 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
                 handleClose();
             })
             .catch((err) => {
-                updateErrors(err.response.data.message);
+                updateErrors(err.response?.data.message);
             });
     };
 
     return (
-        <Dialog open fullWidth onClose={handleClose}>
+        <Dialog open fullWidth maxWidth={false} onClose={handleClose}>
             <DialogTitle>Create Case</DialogTitle>
             <DialogContent>
                 {errors ? (
@@ -77,12 +101,12 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
                     </Alert>
                 ) : null}
                 <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1, justifyContent: 'space-evenly' }}>
-                    {state.allowedVars.map((v) => (
+                    {state.allowedVars.map((allowedVar) => (
                         <CTSMVarInput
-                            key={v.name}
-                            variable={v}
-                            value={variables[v.name]}
-                            onChange={(value) => handleVarChange(v.name, value)}
+                            key={allowedVar.name}
+                            variable={allowedVar}
+                            value={variables.find((v) => v.name === allowedVar.name)?.value}
+                            onChange={(value) => handleVarChange(allowedVar.name, value)}
                         />
                     ))}
                 </Box>
