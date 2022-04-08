@@ -196,7 +196,7 @@ const CaseListRow = ({ caseInfo, handleEdit, handleDelete }: Props) => {
                 <DialogTitle>Variables</DialogTitle>
                 <DialogContent>
                     <List dense disablePadding>
-                        {state.allowedVars.map((allowedVar) => (
+                        {state.variablesConfig.map((allowedVar) => (
                             <ListItem key={allowedVar.name}>
                                 <ListItemText
                                     sx={{ pl: 0, display: 'flex' }}

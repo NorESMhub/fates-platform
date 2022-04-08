@@ -3,7 +3,7 @@ interface State {
     sitesBounds: maplibregl.LngLatBoundsLike;
     selectedSite?: SiteProps;
     selectedSiteCases?: CaseWithTaskInfo[];
-    allowedVars: CaseAllowedVariable[];
+    variablesConfig: CaseVariableConfig[];
     popover: PopoverProps;
 }
 
@@ -22,9 +22,9 @@ interface UpdateSelectedSiteCases {
     cases?: CaseWithTaskInfo[];
 }
 
-interface UpdateAllowedVars {
-    type: 'updateAllowedVars';
-    vars: CaseAllowedVariable[];
+interface UpdateVariablesConfig {
+    type: 'updateVariablesConfig';
+    vars: CaseVariableConfig[];
 }
 
 interface UpdatePopover {
@@ -32,7 +32,7 @@ interface UpdatePopover {
     popover: PopoverProps;
 }
 
-type Action = UpdateSites | UpdateSelectedSite | UpdateSelectedSiteCases | UpdateAllowedVars | UpdatePopover;
+type Action = UpdateSites | UpdateSelectedSite | UpdateSelectedSiteCases | UpdateVariablesConfig | UpdatePopover;
 
 interface StoreContext {
     state: State;

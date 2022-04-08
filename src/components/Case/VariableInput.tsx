@@ -9,31 +9,31 @@ import TextField from '@mui/material/TextField';
 import DatePicker from '@mui/lab/DatePicker';
 
 interface Props {
-    variable: CaseAllowedVariable;
-    value?: CTSMVarValue;
-    onChange: (value?: CTSMVarValue) => void;
+    variable: CaseVariableConfig;
+    value?: VariableValue;
+    onChange: (value?: VariableValue) => void;
 }
 
-const CTSMVarInput = ({ variable, value, onChange }: Props) => {
+const VariableInput = ({ variable, value, onChange }: Props) => {
     if (variable.validation?.choices) {
         return (
             <FormControl size="small" margin="normal">
                 <Autocomplete
-                    multiple={variable.validation.allow_multiple}
+                    multiple={variable.allow_multiple}
                     options={variable.validation.choices}
-                    disableCloseOnSelect={variable.validation.allow_multiple}
+                    disableCloseOnSelect={variable.allow_multiple}
                     filterSelectedOptions
                     renderInput={(params) => (
                         <TextField {...params} size="small" margin="dense" label={variable.name} />
                     )}
                     value={
                         value ||
-                        (variable.validation.allow_multiple && !Array.isArray(variable.default)
+                        (variable.allow_multiple && !Array.isArray(variable.default)
                             ? [variable.default]
                             : variable.default)
                     }
                     onChange={(_event, newValue) => {
-                        onChange((newValue || undefined) as CTSMVarValue);
+                        onChange((newValue || undefined) as VariableValue);
                     }}
                 />
                 <FormHelperText>{variable.description}</FormHelperText>
@@ -105,4 +105,4 @@ const CTSMVarInput = ({ variable, value, onChange }: Props) => {
     }
 };
 
-export default CTSMVarInput;
+export default VariableInput;

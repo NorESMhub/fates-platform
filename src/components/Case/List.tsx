@@ -40,14 +40,16 @@ const SiteList = ({ site }: Props) => {
             <Table>
                 <TableHead>
                     <TableRow>
-                        {[
-                            { label: 'Case ID' },
-                            { label: 'Status' },
-                            { label: 'Date Created' },
-                            { label: 'Grid', description: { text: '[PLACEHOLDER_TEXT]' } },
-                            { label: 'Compset', description: { text: '[PLACEHOLDER_TEXT]' } },
-                            { label: 'Variables', description: { text: '[PLACEHOLDER_TEXT]' } }
-                        ].map(({ label, description }) => (
+                        {(
+                            [
+                                { label: 'Case ID' },
+                                { label: 'Status' },
+                                { label: 'Date Created' },
+                                { label: 'Grid', description: { text: '[PLACEHOLDER_TEXT]' } },
+                                { label: 'Compset', description: { text: '[PLACEHOLDER_TEXT]' } },
+                                { label: 'Variables', description: { text: '[PLACEHOLDER_TEXT]' } }
+                            ] as Array<{ label: string; description: { text: string; url?: string } }>
+                        ).map(({ label, description }) => (
                             <TableCell key={label} align="center">
                                 <Stack direction="row" spacing={1}>
                                     <Typography variant="h6">{label}</Typography>
@@ -88,7 +90,18 @@ const SiteList = ({ site }: Props) => {
                 </TableBody>
             </Table>
             {editCase ? (
-                <CaseEdit initialVariables={editCase.variables || []} handleClose={() => updatedEditCase(null)} />
+                <CaseEdit
+                    initialVariables={
+                        editCase.variables.reduce<{ [key: string]: VariableValue | undefined }>(
+                            (variables, variable) => {
+                                variables[variable.name] = variable.value;
+                                return variables;
+                            },
+                            {}
+                        ) || {}
+                    }
+                    handleClose={() => updatedEditCase(null)}
+                />
             ) : null}
             {deleteCase ? <CaseDelete caseInfo={deleteCase} handleClose={() => updatedDeleteCase(null)} /> : null}
         </>

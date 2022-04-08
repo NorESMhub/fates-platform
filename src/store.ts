@@ -8,7 +8,7 @@ export const initialState: State = {
     sitesBounds: new maplibre.LngLatBounds([-180, -90], [180, 90]),
     selectedSite: undefined,
     selectedSiteCases: undefined,
-    allowedVars: [],
+    variablesConfig: [],
     popover: {}
 };
 
@@ -35,10 +35,10 @@ export const reducers = (state: State, action: Action): State => {
                 selectedSiteCases: action.cases
             };
         }
-        case 'updateAllowedVars': {
+        case 'updateVariablesConfig': {
             return {
                 ...state,
-                allowedVars: action.vars
+                variablesConfig: action.vars
             };
         }
         case 'updatePopover': {

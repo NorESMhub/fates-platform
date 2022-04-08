@@ -1,39 +1,41 @@
-type CTSMVarType = 'char' | 'integer' | 'logical' | 'date';
+type VariableType = 'char' | 'integer' | 'logical' | 'date';
 
-type CTSMVarValue = string | number | boolean | Array<string | number | boolean>;
-
-interface CTSMVars {
-    [key: string]: CTSMVarValue | undefined;
-}
+type VariableValue = string | number | boolean | Array<string | number | boolean>;
 
 interface VariableValidation {
     min?: number;
     max?: number;
     pattern?: string;
     choices?: Array<string | number>;
-    allow_multiple?: boolean;
 }
 
 type VariableCategory = 'ctsm_xml' | 'ctsm_nl_lnd' | 'fates';
 
-interface CaseAllowedVariable {
+interface CaseVariableConfig {
     name: string;
     category: VariableCategory;
-    type: CTSMVarType;
-    validation?: VariableValidation;
+    type: VariableType;
     description?: string;
-    default?: CTSMVarValue;
-    value?: CTSMVarValue;
+    allow_multiple?: boolean;
+    validation?: VariableValidation;
+    default?: VariableValue;
+}
+
+interface CaseVariable {
+    name: string;
+    value: VariableValue;
 }
 
 type CaseStatus = 'INITIALISED' | 'CREATED' | 'UPDATED' | 'SETUP' | 'BUILT' | 'SUBMITTED';
+
+type CTSMDriver = 'mct' | 'nuopc';
 
 interface Case {
     id: string;
     compset: string;
     res: string;
-    variables: CaseAllowedVars[];
-    driver: 'mct' | 'nuopc';
+    variables: CaseVariable[];
+    driver: CTSMDriver;
     data_url: string;
     ctsm_tag: string;
     status: CaseStatus;
@@ -43,8 +45,8 @@ interface Case {
 
 interface CaseEditPayload {
     site_name: string;
-    variables: CaseAllowedVariable[];
-    driver: 'mct' | 'nuopc';
+    variables: CaseVariable[];
+    driver: CTSMDriver;
 }
 
 type TaskStatus =

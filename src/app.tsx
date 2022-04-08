@@ -29,8 +29,8 @@ const App = (): JSX.Element => {
             })
             .catch(console.error);
 
-        axios.get<CaseAllowedVariable[]>(`${API_PATH}/cases/allowed_vars`).then(({ data }) => {
-            dispatch({ type: 'updateAllowedVars', vars: data });
+        axios.get<CaseVariableConfig[]>(`${API_PATH}/cases/variables`).then(({ data }) => {
+            dispatch({ type: 'updateVariablesConfig', vars: data });
         });
     }, []);
 

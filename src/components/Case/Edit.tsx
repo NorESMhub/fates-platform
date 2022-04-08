@@ -9,17 +9,17 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 
 import { StateContext } from '../../store';
-import CTSMVarInput from './CTSMVarInput';
+import VariableInput from './VariableInput';
 
 interface Props {
-    initialVariables: CaseAllowedVariable[];
+    initialVariables: { [key: string]: VariableValue | undefined };
     handleClose: () => void;
 }
 
 const CaseEdit = ({ initialVariables, handleClose }: Props) => {
     const { state, dispatch } = React.useContext(StateContext);
 
-    const [variables, updateVariables] = React.useState<CaseAllowedVariable[]>(initialVariables);
+    const [variables, updateVariables] = React.useState(initialVariables);
 
     const [errors, updateErrors] = React.useState<string>('');
 
@@ -27,31 +27,21 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
         updateVariables(initialVariables);
     }, [initialVariables]);
 
-    const handleVarChange = (name: string, value?: CTSMVarValue) => {
-        const varIdx = variables.findIndex((v) => v.name === name);
-        if (varIdx === -1) {
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            updateVariables([...variables, { ...state.allowedVars.find((v) => v.name === name)!, value }]);
-        } else {
-            updateVariables([
-                ...variables.slice(0, varIdx),
-                {
-                    ...variables[varIdx],
-                    value
-                },
-                ...variables.slice(varIdx + 1)
-            ]);
-        }
+    const handleVariableChange = (name: string, value?: VariableValue) => {
+        updateVariables({
+            ...variables,
+            [name]: value
+        });
     };
 
     const handleSubmit = () => {
-        const preparedVariables: CaseAllowedVariable[] = [];
-        state.allowedVars.forEach((allowedVar) => {
-            const variable = variables.find((v) => v.name === allowedVar.name);
-            if (variable !== undefined && variable.value !== undefined) {
+        const preparedVariables: CaseVariable[] = [];
+        state.variablesConfig.forEach((variableConfig) => {
+            const value = variables[variableConfig.name];
+            if (value !== undefined) {
                 preparedVariables.push({
-                    ...allowedVar,
-                    value: variable.value
+                    ...variableConfig,
+                    value
                 });
             }
         });
@@ -101,12 +91,12 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
                     </Alert>
                 ) : null}
                 <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1, justifyContent: 'space-evenly' }}>
-                    {state.allowedVars.map((allowedVar) => (
-                        <CTSMVarInput
-                            key={allowedVar.name}
-                            variable={allowedVar}
-                            value={variables.find((v) => v.name === allowedVar.name)?.value}
-                            onChange={(value) => handleVarChange(allowedVar.name, value)}
+                    {state.variablesConfig.map((variableConfig) => (
+                        <VariableInput
+                            key={variableConfig.name}
+                            variable={variableConfig}
+                            value={variables[variableConfig.name]}
+                            onChange={(value) => handleVariableChange(variableConfig.name, value)}
                         />
                     ))}
                 </Box>
