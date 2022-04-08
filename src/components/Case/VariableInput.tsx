@@ -11,10 +11,32 @@ import DatePicker from '@mui/lab/DatePicker';
 interface Props {
     variable: CaseVariableConfig;
     value?: VariableValue;
+    error?: string;
     onChange: (value?: VariableValue) => void;
 }
 
-const VariableInput = ({ variable, value, onChange }: Props) => {
+const VariableInput = ({ variable, value, error, onChange }: Props) => {
+    if (variable.readonly) {
+        return (
+            <FormControl size="small" margin="normal">
+                <TextField
+                    disabled
+                    label={variable.name}
+                    helperText={variable.description}
+                    size="small"
+                    margin="dense"
+                    InputLabelProps={{ shrink: true }}
+                    InputProps={{
+                        notched: true,
+                        inputProps: {
+                            placeholder: variable.default?.toString()
+                        }
+                    }}
+                    value={variable.default}
+                />
+            </FormControl>
+        );
+    }
     if (variable.validation?.choices) {
         return (
             <FormControl size="small" margin="normal">
@@ -24,7 +46,7 @@ const VariableInput = ({ variable, value, onChange }: Props) => {
                     disableCloseOnSelect={variable.allow_multiple}
                     filterSelectedOptions
                     renderInput={(params) => (
-                        <TextField {...params} size="small" margin="dense" label={variable.name} />
+                        <TextField {...params} error={!!error} size="small" margin="dense" label={variable.name} />
                     )}
                     value={
                         value ||
@@ -45,11 +67,20 @@ const VariableInput = ({ variable, value, onChange }: Props) => {
             return (
                 <FormControl size="small" margin="normal">
                     <TextField
+                        error={!!error}
                         label={variable.name}
                         helperText={variable.description}
                         size="small"
                         margin="dense"
-                        value={value || variable.default}
+                        InputLabelProps={{ shrink: true }}
+                        InputProps={{
+                            notched: true,
+                            inputProps: {
+                                pattern: variable.validation?.pattern,
+                                placeholder: variable.default?.toString()
+                            }
+                        }}
+                        value={value}
                         onChange={(e) => onChange(e.target.value)}
                     />
                 </FormControl>
@@ -62,7 +93,23 @@ const VariableInput = ({ variable, value, onChange }: Props) => {
                         inputFormat="yyyy-MM-dd"
                         mask="____-__-__"
                         renderInput={(params) => (
-                            <TextField {...params} helperText={variable.description} size="small" margin="dense" />
+                            <TextField
+                                {...params}
+                                error={!!error}
+                                variant="outlined"
+                                InputLabelProps={{ ...params.InputLabelProps, shrink: true }}
+                                InputProps={{
+                                    ...params.InputProps,
+                                    notched: true,
+                                    inputProps: {
+                                        ...params.inputProps,
+                                        placeholder: variable.default?.toString()
+                                    }
+                                }}
+                                helperText={variable.description}
+                                size="small"
+                                margin="dense"
+                            />
                         )}
                         /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
                         // @ts-ignore-next-line
@@ -72,15 +119,26 @@ const VariableInput = ({ variable, value, onChange }: Props) => {
                 </FormControl>
             );
         case 'integer':
+        case 'float':
             return (
                 <FormControl size="small" margin="normal">
                     <TextField
+                        error={!!error}
                         label={variable.name}
                         helperText={variable.description}
                         size="small"
                         margin="dense"
-                        inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
-                        value={value || variable.default}
+                        InputLabelProps={{ shrink: true }}
+                        InputProps={{
+                            notched: true,
+                            inputProps: {
+                                type: 'number',
+                                min: variable.validation?.min,
+                                max: variable.validation?.max,
+                                placeholder: variable.default?.toString()
+                            }
+                        }}
+                        value={value}
                         onChange={(e) => onChange(e.target.value)}
                     />
                 </FormControl>

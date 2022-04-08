@@ -1,4 +1,4 @@
-type VariableType = 'char' | 'integer' | 'logical' | 'date';
+type VariableType = 'char' | 'integer' | 'float' | 'logical' | 'date';
 
 type VariableValue = string | number | boolean | Array<string | number | boolean>;
 
@@ -16,6 +16,7 @@ interface CaseVariableConfig {
     category: VariableCategory;
     type: VariableType;
     description?: string;
+    readonly?: boolean;
     allow_multiple?: boolean;
     validation?: VariableValidation;
     default?: VariableValue;
