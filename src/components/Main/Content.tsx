@@ -65,7 +65,9 @@ const Content = (): JSX.Element => {
         map.on('click', 'sites', (e) => {
             if (e.features && e.features.length > 0) {
                 const site =
-                    e.features[0].id === refs.current.selectedSite?.name ? undefined : e.features[0].properties;
+                    e.features[0].id === refs.current.selectedSite?.name
+                        ? undefined
+                        : (e.features[0].properties as SiteProps);
                 dispatch({
                     type: 'updateSelectedSite',
                     site
@@ -182,7 +184,8 @@ const Content = (): JSX.Element => {
                 onClose={() => dispatch({ type: 'updatePopover', popover: {} })}
             >
                 <Stack sx={{ p: 1, maxWidth: 300 }} direction="row" alignItems="center" spacing={1}>
-                    <Typography variant="caption">{state.popover.text}</Typography>
+                    {/* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */}
+                    <Typography variant="caption" dangerouslySetInnerHTML={{ __html: state.popover.text! }} />
                     {state.popover?.url ? (
                         <Link href={state.popover?.url} target="_blank" rel="noopener,noreferrer">
                             <Icon baseClassName="icons" fontSize="small">

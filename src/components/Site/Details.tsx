@@ -66,7 +66,7 @@ const Details = ({ site }: Props) => {
                     </Box>
                 </CardContent>
             </Card>
-            {editCase ? <CaseEdit initialVariables={[]} handleClose={() => updatedEditCase(false)} /> : null}
+            {editCase ? <CaseEdit initialVariables={{}} handleClose={() => updatedEditCase(false)} /> : null}
         </>
     );
 };

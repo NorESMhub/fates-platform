@@ -166,7 +166,6 @@ const CaseListRow = ({ caseInfo, handleEdit, handleDelete }: Props) => {
                     </Typography>
                 </TableCell>
                 <TableCell align="center">
-                    {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
                     <Link component="button" onClick={() => updateShowVariables(true)}>
                         See Variables
                     </Link>
@@ -196,16 +195,17 @@ const CaseListRow = ({ caseInfo, handleEdit, handleDelete }: Props) => {
                 <DialogTitle>Variables</DialogTitle>
                 <DialogContent>
                     <List dense disablePadding>
-                        {state.variablesConfig.map((allowedVar) => (
-                            <ListItem key={allowedVar.name}>
+                        {state.variablesConfig.map((variableConfig) => (
+                            <ListItem key={variableConfig.name}>
                                 <ListItemText
                                     sx={{ pl: 0, display: 'flex' }}
-                                    primary={`${allowedVar.name}:`}
+                                    primary={`${variableConfig.name}:`}
                                     primaryTypographyProps={{ sx: { mr: 1 }, variant: 'caption' }}
-                                    secondary={
-                                        caseInfo.variables.find((v) => v.name === allowedVar.name)?.value ||
-                                        allowedVar.default
-                                    }
+                                    secondary={(
+                                        caseInfo.variables.find((v) => v.name === variableConfig.name)?.value ||
+                                        variableConfig.default ||
+                                        ''
+                                    ).toLocaleString()}
                                     secondaryTypographyProps={{ component: 'span', variant: 'subtitle2' }}
                                     inset
                                 />

@@ -9,13 +9,17 @@ interface VariableValidation {
     choices?: Array<string | number>;
 }
 
-type VariableCategory = 'ctsm_xml' | 'ctsm_nl_lnd' | 'fates';
+type VariableCategory = 'ctsm_xml' | 'user_nl_clm' | 'fates';
 
 interface CaseVariableConfig {
     name: string;
     category: VariableCategory;
     type: VariableType;
-    description?: string;
+    description?: {
+        summary: string;
+        details?: string;
+        url?: string;
+    };
     readonly?: boolean;
     allow_multiple?: boolean;
     validation?: VariableValidation;
@@ -78,6 +82,7 @@ interface SiteProps {
     compset: string;
     res: string;
     url: string;
+    config?: CaseVariable[];
 }
 
 interface Sites {

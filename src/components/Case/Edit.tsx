@@ -1,5 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
 import React from 'react';
+import makeStyles from '@mui/styles/makeStyles';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -7,9 +8,17 @@ import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
+import Tab from '@mui/material/Tab';
+import Tabs from '@mui/material/Tabs';
 
 import { StateContext } from '../../store';
 import VariableInput from './VariableInput';
+
+const useStyles = makeStyles({
+    dialogContainer: {
+        alignItems: 'flex-start'
+    }
+});
 
 interface Props {
     initialVariables: { [key: string]: VariableValue | undefined };
@@ -17,7 +26,11 @@ interface Props {
 }
 
 const CaseEdit = ({ initialVariables, handleClose }: Props) => {
+    const classes = useStyles();
+
     const { state, dispatch } = React.useContext(StateContext);
+
+    const [activeTab, updateActiveTab] = React.useState<VariableCategory>('ctsm_xml');
 
     const [variables, updateVariables] = React.useState(initialVariables);
 
@@ -35,16 +48,17 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
     };
 
     const handleSubmit = () => {
-        const preparedVariables: CaseVariable[] = [];
-        state.variablesConfig.forEach((variableConfig) => {
-            const value = variables[variableConfig.name];
-            if (value !== undefined) {
-                preparedVariables.push({
-                    ...variableConfig,
-                    value
-                });
-            }
-        });
+        const preparedVariables: CaseVariable[] = state.variablesConfig.map(
+            (variableConfig) =>
+                ({
+                    name: variableConfig.name,
+                    value:
+                        variables[variableConfig.name] !== undefined
+                            ? variables[variableConfig.name]
+                            : state.selectedSite?.config?.find((variable) => variable.name === variableConfig.name)
+                                  ?.value || variableConfig.default
+                } as CaseVariable)
+        );
         axios
             .post<CaseWithTaskInfo, AxiosResponse<CaseWithTaskInfo>, CaseEditPayload>(`${API_PATH}/sites`, {
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -82,7 +96,14 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
     };
 
     return (
-        <Dialog open fullWidth maxWidth={false} onClose={handleClose}>
+        <Dialog
+            classes={{ container: classes.dialogContainer }}
+            open
+            fullWidth
+            maxWidth={false}
+            scroll="paper"
+            onClose={handleClose}
+        >
             <DialogTitle>Create Case</DialogTitle>
             <DialogContent>
                 {errors ? (
@@ -90,15 +111,22 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
                         {errors}
                     </Alert>
                 ) : null}
+                <Tabs value={activeTab} onChange={(_e, tab) => updateActiveTab(tab)}>
+                    <Tab label="CTSM" value="ctsm_xml" />
+                    <Tab label="Namelist - CLM" value="user_nl_clm" />
+                    <Tab label="FATES" value="fates" />
+                </Tabs>
                 <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1, justifyContent: 'space-evenly' }}>
-                    {state.variablesConfig.map((variableConfig) => (
-                        <VariableInput
-                            key={variableConfig.name}
-                            variable={variableConfig}
-                            value={variables[variableConfig.name]}
-                            onChange={(value) => handleVariableChange(variableConfig.name, value)}
-                        />
-                    ))}
+                    {state.variablesConfig
+                        .filter((variableConfig) => variableConfig.category === activeTab)
+                        .map((variableConfig) => (
+                            <VariableInput
+                                key={variableConfig.name}
+                                variable={variableConfig}
+                                value={variables[variableConfig.name]}
+                                onChange={(value) => handleVariableChange(variableConfig.name, value)}
+                            />
+                        ))}
                 </Box>
             </DialogContent>
             <DialogActions>
