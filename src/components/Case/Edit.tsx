@@ -1,5 +1,5 @@
 import axios, { AxiosResponse } from 'axios';
-import React from 'react';
+import React, { Fragment } from 'react';
 import makeStyles from '@mui/styles/makeStyles';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
@@ -10,6 +10,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
+import Typography from '@mui/material/Typography';
 
 import { StateContext } from '../../store';
 import VariableInput from './VariableInput';
@@ -33,8 +34,9 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
     const [activeTab, updateActiveTab] = React.useState<VariableCategory>('ctsm_xml');
 
     const [variables, updateVariables] = React.useState(initialVariables);
+    const [variablesErrors, updateVariablesErrors] = React.useState<{ [key: string]: boolean }>({});
 
-    const [errors, updateErrors] = React.useState<string>('');
+    const [serverErrors, updateServerErrors] = React.useState<HTTPError>('');
 
     React.useEffect(() => {
         updateVariables(initialVariables);
@@ -90,8 +92,8 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
                 }
                 handleClose();
             })
-            .catch((err) => {
-                updateErrors(err.response?.data.message);
+            .catch(({ response: { data } }) => {
+                updateServerErrors(data);
             });
     };
 
@@ -106,9 +108,13 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
         >
             <DialogTitle>Create Case</DialogTitle>
             <DialogContent>
-                {errors ? (
-                    <Alert severity="error" onClose={() => updateErrors('')}>
-                        {errors}
+                {serverErrors ? (
+                    <Alert severity="error" onClose={() => updateServerErrors('')}>
+                        <Typography variant="subtitle2">
+                            {typeof serverErrors === 'string'
+                                ? serverErrors
+                                : serverErrors.map((error) => <Fragment key={error.msg}>{error.msg}</Fragment>)}
+                        </Typography>
                     </Alert>
                 ) : null}
                 <Tabs value={activeTab} onChange={(_e, tab) => updateActiveTab(tab)}>
@@ -124,6 +130,9 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
                                 key={variableConfig.name}
                                 variable={variableConfig}
                                 value={variables[variableConfig.name]}
+                                handleError={(hasError: boolean) =>
+                                    updateVariablesErrors({ ...variablesErrors, [variableConfig.name]: hasError })
+                                }
                                 onChange={(value) => handleVariableChange(variableConfig.name, value)}
                             />
                         ))}
@@ -133,7 +142,12 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
                 <Button variant="outlined" color="secondary" onClick={handleClose}>
                     Cancel
                 </Button>
-                <Button variant="outlined" color="primary" onClick={handleSubmit}>
+                <Button
+                    variant="outlined"
+                    color="primary"
+                    disabled={Object.values(variablesErrors).some((hasError) => hasError)}
+                    onClick={handleSubmit}
+                >
                     Submit
                 </Button>
             </DialogActions>

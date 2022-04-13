@@ -15,10 +15,11 @@ import { StateContext } from '../../store';
 interface Props {
     variable: CaseVariableConfig;
     value?: VariableValue;
+    handleError: (hasError: boolean) => void;
     onChange: (value?: VariableValue) => void;
 }
 
-const VariableInput = ({ variable, value, onChange }: Props) => {
+const VariableInput = ({ variable, value, handleError, onChange }: Props) => {
     const { state, dispatch } = React.useContext(StateContext);
 
     const defaultValue = state.selectedSite?.config?.find((v) => v.name === variable.name)?.value || variable.default;
@@ -90,6 +91,7 @@ const VariableInput = ({ variable, value, onChange }: Props) => {
                 }
             });
         }
+        handleError(variableErrors.length > 0);
         updateErrors(variableErrors);
         onChange(changedValue);
     };
