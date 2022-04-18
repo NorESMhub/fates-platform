@@ -31,7 +31,16 @@ interface CaseVariable {
     value: VariableValue;
 }
 
-type CaseStatus = 'INITIALISED' | 'CREATED' | 'UPDATED' | 'SETUP' | 'BUILT' | 'SUBMITTED';
+type CaseStatus =
+    | 'INITIALISED'
+    | 'CREATED'
+    | 'SETUP'
+    | 'UPDATED'
+    | 'FATES INDICES SET'
+    | 'CONFIGURED'
+    | 'BUILDING'
+    | 'BUILT'
+    | 'SUBMITTED';
 
 type CTSMDriver = 'mct' | 'nuopc';
 
@@ -45,7 +54,8 @@ interface Case {
     ctsm_tag: string;
     status: CaseStatus;
     date_created: string;
-    task_id?: string;
+    create_task_id?: string;
+    run_task_id?: string;
 }
 
 interface CaseEditPayload {
@@ -66,14 +76,15 @@ type TaskStatus =
     | 'IGNORED';
 
 interface Task {
-    task_id: string;
-    status: TaskStatus;
-    result: string;
+    task_id?: string;
+    status?: TaskStatus;
+    result?: string;
     error?: string;
 }
 
 interface CaseWithTaskInfo extends Case {
-    task: Task;
+    create_task: Task;
+    run_task: Task;
 }
 
 interface SiteProps {

@@ -19,6 +19,56 @@ import Typography from '@mui/material/Typography';
 
 import { StateContext } from '../../store';
 
+const TaskStatusEl = ({ taskStatus, error }: { taskStatus: TaskStatus; error?: string }) => {
+    const { dispatch } = React.useContext(StateContext);
+
+    if (taskStatus === 'FAILURE') {
+        return (
+            <>
+                <Typography component="span" variant="caption">
+                    Failed
+                </Typography>
+                <IconButton
+                    size="small"
+                    onClick={(e) =>
+                        dispatch({
+                            type: 'updatePopover',
+                            popover: {
+                                anchor: e.currentTarget,
+                                text: error
+                            }
+                        })
+                    }
+                >
+                    <Icon baseClassName="icons" fontSize="small" color="error">
+                        error_outline
+                    </Icon>
+                </IconButton>
+            </>
+        );
+    }
+    if (taskStatus === 'SUCCESS') {
+        return (
+            <>
+                <Typography component="span" variant="caption">
+                    Ready
+                </Typography>
+                <Icon baseClassName="icons" fontSize="small" color="success">
+                    check_circle_outline
+                </Icon>
+            </>
+        );
+    }
+    return (
+        <>
+            <Typography component="span" variant="caption">
+                Running ({taskStatus})
+            </Typography>
+            <CircularProgress size={20} />
+        </>
+    );
+};
+
 interface Props {
     caseInfo: CaseWithTaskInfo;
     handleEdit: () => void;
@@ -35,8 +85,9 @@ const CaseListRow = ({ caseInfo, handleEdit, handleDelete }: Props) => {
 
         if (
             state.selectedSite &&
-            caseInfo.status !== 'SUBMITTED' &&
-            !['SUCCESS', 'FAILURE', 'REVOKED'].includes(caseInfo.task.status)
+            (!['SUCCESS', 'FAILURE', 'REVOKED'].includes(caseInfo.create_task.status || '') ||
+                (['BUILDING', 'BUILT'].includes(caseInfo.status) &&
+                    !['SUCCESS', 'FAILURE', 'REVOKED'].includes(caseInfo.run_task.status || '')))
         ) {
             // These are the unready states
             const checkStatus = () => {
@@ -63,7 +114,13 @@ const CaseListRow = ({ caseInfo, handleEdit, handleDelete }: Props) => {
                 clearInterval(intervalId);
             }
         };
-    }, [caseInfo.status, caseInfo.task.status, state.selectedSite, state.selectedSiteCases]);
+    }, [
+        caseInfo.status,
+        caseInfo.create_task.status,
+        caseInfo.run_task.status,
+        state.selectedSite,
+        state.selectedSiteCases
+    ]);
 
     const downloadResults = () => {
         updateIsDownloading(true);
@@ -90,56 +147,9 @@ const CaseListRow = ({ caseInfo, handleEdit, handleDelete }: Props) => {
             });
     };
 
-    let caseStatus;
-    if (caseInfo.task.status === 'FAILURE') {
-        caseStatus = (
-            <>
-                <Typography component="span" variant="caption">
-                    Failed
-                </Typography>
-                <IconButton
-                    size="small"
-                    onClick={(e) =>
-                        dispatch({
-                            type: 'updatePopover',
-                            popover: {
-                                anchor: e.currentTarget,
-                                text: caseInfo.task.error
-                            }
-                        })
-                    }
-                >
-                    <Icon baseClassName="icons" fontSize="small" color="error">
-                        error_outline
-                    </Icon>
-                </IconButton>
-            </>
-        );
-    } else if (caseInfo.task.status === 'SUCCESS') {
-        caseStatus = (
-            <>
-                <Typography component="span" variant="caption">
-                    Ready
-                </Typography>
-                <Icon baseClassName="icons" fontSize="small" color="success">
-                    check_circle_outline
-                </Icon>
-            </>
-        );
-    } else {
-        caseStatus = (
-            <>
-                <Typography component="span" variant="caption">
-                    Running ({caseInfo.status})
-                </Typography>
-                <CircularProgress size={20} />
-            </>
-        );
-    }
-
     return (
         <>
-            <TableRow key={caseInfo.task_id}>
+            <TableRow key={caseInfo.create_task_id}>
                 <TableCell align="center">
                     <Typography component="span" variant="caption">
                         {caseInfo.id}
@@ -147,7 +157,11 @@ const CaseListRow = ({ caseInfo, handleEdit, handleDelete }: Props) => {
                 </TableCell>
                 <TableCell align="center">
                     <Stack direction="row" alignItems="center" spacing={1}>
-                        {caseStatus}
+                        Create:
+                        <TaskStatusEl taskStatus={caseInfo.create_task.status} error={caseInfo.create_task.error} />
+                    </Stack>
+                    <Stack direction="row" alignItems="center" spacing={1}>
+                        Run: <TaskStatusEl taskStatus={caseInfo.run_task.status} error={caseInfo.run_task.error} />
                     </Stack>
                 </TableCell>
                 <TableCell align="center">
@@ -176,7 +190,7 @@ const CaseListRow = ({ caseInfo, handleEdit, handleDelete }: Props) => {
                             variant="outlined"
                             color="primary"
                             size="small"
-                            disabled={caseInfo.task.status !== 'SUCCESS' && caseInfo.status !== 'SUBMITTED'}
+                            disabled={caseInfo.create_task.status !== 'SUCCESS' && caseInfo.status !== 'SUBMITTED'}
                             loading={isDownloading}
                             onClick={downloadResults}
                         >

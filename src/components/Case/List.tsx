@@ -81,7 +81,7 @@ const SiteList = ({ site }: Props) => {
                 <TableBody>
                     {state.selectedSiteCases?.map((caseInfo) => (
                         <CaseListRow
-                            key={caseInfo.task_id}
+                            key={caseInfo.create_task_id}
                             caseInfo={caseInfo}
                             handleEdit={() => updatedEditCase(caseInfo)}
                             handleDelete={() => updatedDeleteCase(caseInfo)}

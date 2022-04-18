@@ -50,17 +50,19 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
     };
 
     const handleSubmit = () => {
-        const preparedVariables: CaseVariable[] = state.variablesConfig.map(
-            (variableConfig) =>
-                ({
-                    name: variableConfig.name,
-                    value:
-                        variables[variableConfig.name] !== undefined
-                            ? variables[variableConfig.name]
-                            : state.selectedSite?.config?.find((variable) => variable.name === variableConfig.name)
-                                  ?.value || variableConfig.default
-                } as CaseVariable)
-        );
+        const preparedVariables: CaseVariable[] = state.variablesConfig
+            .map(
+                (variableConfig) =>
+                    ({
+                        name: variableConfig.name,
+                        value:
+                            variables[variableConfig.name] !== undefined
+                                ? variables[variableConfig.name]
+                                : state.selectedSite?.config?.find((variable) => variable.name === variableConfig.name)
+                                      ?.value || variableConfig.default
+                    } as CaseVariable)
+            )
+            .filter((variable) => variable.value !== undefined && variable.value !== null && variable.value !== '');
         axios
             .post<CaseWithTaskInfo, AxiosResponse<CaseWithTaskInfo>, CaseEditPayload>(`${API_PATH}/sites`, {
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -111,9 +113,9 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
                 {serverErrors ? (
                     <Alert severity="error" onClose={() => updateServerErrors('')}>
                         <Typography variant="subtitle2">
-                            {typeof serverErrors === 'string'
-                                ? serverErrors
-                                : serverErrors.map((error) => <Fragment key={error.msg}>{error.msg}</Fragment>)}
+                            {Array.isArray(serverErrors)
+                                ? serverErrors.map((error) => <Fragment key={error.msg}>{error.msg}</Fragment>)
+                                : serverErrors}
                         </Typography>
                     </Alert>
                 ) : null}
