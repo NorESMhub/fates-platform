@@ -49,10 +49,7 @@
       "never"
     ],
     "default-case": "off",
-    "function-paren-newline": [
-      "error",
-      "consistent"
-    ],
+    "function-paren-newline": "off",
     "import/extensions": [
       "error",
       "ignorePackages",

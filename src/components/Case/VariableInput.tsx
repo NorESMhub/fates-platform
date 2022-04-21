@@ -7,59 +7,77 @@ import FormControl from '@mui/material/FormControl';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormHelperText from '@mui/material/FormHelperText';
 import Link from '@mui/material/Link';
+import TableCell from '@mui/material/TableCell';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import DatePicker from '@mui/lab/DatePicker';
+
 import { StateContext } from '../../store';
 
 interface Props {
     variable: CaseVariableConfig;
+    pftIndexCount?: number;
     value?: VariableValue;
     handleError: (hasError: boolean) => void;
     onChange: (value?: VariableValue) => void;
 }
 
-const VariableInput = ({ variable, value, handleError, onChange }: Props) => {
+const VariableInput = ({ variable, pftIndexCount, value, handleError, onChange }: Props) => {
     const { state, dispatch } = React.useContext(StateContext);
 
-    const defaultValue = state.selectedSite?.config?.find((v) => v.name === variable.name)?.value || variable.default;
     const [errors, updateErrors] = React.useState<string[]>([]);
+    const hasErrors = errors.length > 0;
+
+    const [fatesErrors, updateFATESErrors] = React.useState<boolean[]>([]);
+
+    const [fatesParamValue, updateFATESParamValue] = React.useState<(VariableValue | undefined)[]>(
+        value as VariableValue[]
+    );
+
+    const defaultValue = state.selectedSite?.config?.find((v) => v.name === variable.name)?.value || variable.default;
+    const getFATESParamValue = (): (VariableValue | undefined)[] => {
+        return (fatesParamValue || defaultValue) as (VariableValue | undefined)[];
+    };
 
     const { description } = variable;
-    const helperText = description ? (
+    const helperText = (
         <>
-            {description.summary}
-            {description.details ? (
+            {description ? (
                 <>
-                    &nbsp;
-                    <Link
-                        href="#"
-                        onClick={(e) => {
-                            dispatch({
-                                type: 'updatePopover',
-                                popover: {
-                                    anchor: e.currentTarget,
-                                    text: description.details,
-                                    url: description.url
-                                }
-                            });
-                        }}
-                    >
-                        (read more)
-                    </Link>
+                    {description.summary}
+                    {description.details ? (
+                        <>
+                            &nbsp;
+                            <Link
+                                href="#"
+                                onClick={(e) => {
+                                    dispatch({
+                                        type: 'updatePopover',
+                                        popover: {
+                                            anchor: e.currentTarget,
+                                            text: description.details,
+                                            url: description.url
+                                        }
+                                    });
+                                }}
+                            >
+                                (read more)
+                            </Link>
+                        </>
+                    ) : null}
                 </>
             ) : null}
             {errors.length ? (
                 <Box sx={{ display: 'flex', flexDirection: 'column' }} component="span">
                     {errors.map((error) => (
-                        <Typography key={error} variant="subtitle2" component="span">
+                        <Typography key={error} variant="caption" component="span">
                             {error}
                         </Typography>
                     ))}
                 </Box>
             ) : null}
         </>
-    ) : null;
+    );
 
     const handleChange = (changedValue?: VariableValue) => {
         const variableErrors: string[] = [];
@@ -96,7 +114,28 @@ const VariableInput = ({ variable, value, handleError, onChange }: Props) => {
         onChange(changedValue);
     };
 
-    const hasErrors = errors.length > 0;
+    const handleFATESParamChange = (idx: number, changedValue?: string) => {
+        const variableErrors = [...fatesErrors];
+        variableErrors[idx] = false;
+
+        if (changedValue) {
+            if (Number.isNaN(Number(changedValue))) {
+                variableErrors[idx] = true;
+            }
+        }
+
+        const newValue = [...getFATESParamValue()];
+        newValue[idx] = changedValue;
+
+        updateFATESErrors(variableErrors);
+        updateFATESParamValue(newValue);
+
+        updateErrors(variableErrors.some((e) => e) ? ['Only accepts number'] : []);
+
+        if (!variableErrors.length) {
+            handleChange(newValue as VariableValue);
+        }
+    };
 
     if (variable.readonly) {
         return (
@@ -117,6 +156,35 @@ const VariableInput = ({ variable, value, handleError, onChange }: Props) => {
                     value={defaultValue}
                 />
             </FormControl>
+        );
+    }
+
+    if (variable.category === 'fates_param') {
+        return (
+            <>
+                <TableCell sx={{ borderBottom: 'none ' }} align="center" size="small">
+                    {variable.name}
+                    <FormHelperText error={hasErrors}>{helperText}</FormHelperText>
+                </TableCell>
+                {[...Array(pftIndexCount).keys()].map((idx) => (
+                    <TableCell key={idx} sx={{ borderBottom: 'none ' }} align="center" size="small">
+                        <TextField
+                            error={fatesErrors[idx]}
+                            size="small"
+                            margin="dense"
+                            variant="standard"
+                            InputProps={{
+                                inputProps: {
+                                    sx: { textAlign: 'center' },
+                                    placeholder: (defaultValue as VariableValue[])[idx].toString()
+                                }
+                            }}
+                            value={getFATESParamValue()[idx]}
+                            onChange={(e) => handleFATESParamChange(idx, e.target.value)}
+                        />
+                    </TableCell>
+                ))}
+            </>
         );
     }
 

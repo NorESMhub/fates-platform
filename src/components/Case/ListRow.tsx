@@ -1,12 +1,9 @@
 import axios from 'axios';
 import React from 'react';
 import Button from '@mui/material/Button';
-import CircularProgress from '@mui/material/CircularProgress';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
-import Icon from '@mui/material/Icon';
-import IconButton from '@mui/material/IconButton';
 import Link from '@mui/material/Link';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
@@ -18,56 +15,8 @@ import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 
 import { StateContext } from '../../store';
-
-const TaskStatusEl = ({ taskStatus, error }: { taskStatus: TaskStatus; error?: string }) => {
-    const { dispatch } = React.useContext(StateContext);
-
-    if (taskStatus === 'FAILURE') {
-        return (
-            <>
-                <Typography component="span" variant="caption">
-                    Failed
-                </Typography>
-                <IconButton
-                    size="small"
-                    onClick={(e) =>
-                        dispatch({
-                            type: 'updatePopover',
-                            popover: {
-                                anchor: e.currentTarget,
-                                text: error
-                            }
-                        })
-                    }
-                >
-                    <Icon baseClassName="icons" fontSize="small" color="error">
-                        error_outline
-                    </Icon>
-                </IconButton>
-            </>
-        );
-    }
-    if (taskStatus === 'SUCCESS') {
-        return (
-            <>
-                <Typography component="span" variant="caption">
-                    Ready
-                </Typography>
-                <Icon baseClassName="icons" fontSize="small" color="success">
-                    check_circle_outline
-                </Icon>
-            </>
-        );
-    }
-    return (
-        <>
-            <Typography component="span" variant="caption">
-                Running ({taskStatus})
-            </Typography>
-            <CircularProgress size={20} />
-        </>
-    );
-};
+import { renderVariableValue } from '../../utils/cases';
+import Status from './Status';
 
 interface Props {
     caseInfo: CaseWithTaskInfo;
@@ -92,7 +41,11 @@ const CaseListRow = ({ caseInfo, handleEdit, handleDelete }: Props) => {
             // These are the unready states
             const checkStatus = () => {
                 axios.get<CaseWithTaskInfo>(`${API_PATH}/cases/${caseInfo.id}`).then(({ data }) => {
-                    if (data.status !== caseInfo.status) {
+                    if (
+                        data.status !== caseInfo.status ||
+                        data.create_task.status !== caseInfo.create_task.status ||
+                        data.run_task.status !== caseInfo.run_task.status
+                    ) {
                         // Update the case task info
                         dispatch({
                             type: 'updateSelectedSiteCases',
@@ -121,6 +74,23 @@ const CaseListRow = ({ caseInfo, handleEdit, handleDelete }: Props) => {
         state.selectedSite,
         state.selectedSiteCases
     ]);
+
+    const handleRun = () => {
+        axios
+            .post<CaseWithTaskInfo>(`${API_PATH}/cases/${caseInfo.id}/`)
+            .then(({ data }) => {
+                dispatch({
+                    type: 'updateSelectedSiteCases',
+                    cases: state.selectedSiteCases?.map((c) => {
+                        if (c.id === caseInfo.id) {
+                            return data;
+                        }
+                        return c;
+                    })
+                });
+            })
+            .catch(console.error);
+    };
 
     const downloadResults = () => {
         updateIsDownloading(true);
@@ -157,11 +127,16 @@ const CaseListRow = ({ caseInfo, handleEdit, handleDelete }: Props) => {
                 </TableCell>
                 <TableCell align="center">
                     <Stack direction="row" alignItems="center" spacing={1}>
-                        Create:
-                        <TaskStatusEl taskStatus={caseInfo.create_task.status} error={caseInfo.create_task.error} />
+                        <Typography component="span" variant="caption">
+                            Create:
+                        </Typography>
+                        <Status status={caseInfo.create_task.status} error={caseInfo.create_task.error} />
                     </Stack>
                     <Stack direction="row" alignItems="center" spacing={1}>
-                        Run: <TaskStatusEl taskStatus={caseInfo.run_task.status} error={caseInfo.run_task.error} />
+                        <Typography component="span" variant="caption">
+                            Run:
+                        </Typography>
+                        <Status status={caseInfo.run_task.status} error={caseInfo.run_task.error} />
                     </Stack>
                 </TableCell>
                 <TableCell align="center">
@@ -190,7 +165,16 @@ const CaseListRow = ({ caseInfo, handleEdit, handleDelete }: Props) => {
                             variant="outlined"
                             color="primary"
                             size="small"
-                            disabled={caseInfo.create_task.status !== 'SUCCESS' && caseInfo.status !== 'SUBMITTED'}
+                            disabled={!['CONFIGURED', 'SUBMITTED'].includes(caseInfo.status)}
+                            onClick={handleRun}
+                        >
+                            Run
+                        </LoadingButton>
+                        <LoadingButton
+                            variant="outlined"
+                            color="primary"
+                            size="small"
+                            disabled={caseInfo.run_task.status !== 'SUCCESS' && caseInfo.status !== 'SUBMITTED'}
                             loading={isDownloading}
                             onClick={downloadResults}
                         >
@@ -215,10 +199,10 @@ const CaseListRow = ({ caseInfo, handleEdit, handleDelete }: Props) => {
                                     sx={{ pl: 0, display: 'flex' }}
                                     primary={`${variableConfig.name}:`}
                                     primaryTypographyProps={{ sx: { mr: 1 }, variant: 'caption' }}
-                                    secondary={(
+                                    secondary={renderVariableValue(
                                         caseInfo.variables.find((v) => v.name === variableConfig.name)?.value ||
-                                        variableConfig.default ||
-                                        ''
+                                            variableConfig.default ||
+                                            ''
                                     ).toLocaleString()}
                                     secondaryTypographyProps={{ component: 'span', variant: 'subtitle2' }}
                                     inset

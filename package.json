@@ -2,7 +2,7 @@
   "name": "fates-platform",
   "version": "0.1.0",
   "description": "",
-  "repository": "https://github.com/ka7eh/fates-platform",
+  "repository": "https://github.com/NorESMhub/fates-platform",
   "main": "src/app.tsx",
   "scripts": {
     "start": "webpack serve --config webpack.dev.js",

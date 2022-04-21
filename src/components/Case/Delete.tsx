@@ -12,6 +12,7 @@ import ListItemText from '@mui/material/ListItemText';
 import Typography from '@mui/material/Typography';
 
 import { StateContext } from '../../store';
+import { renderVariableValue } from '../../utils/cases';
 
 interface Props {
     caseInfo: CaseWithTaskInfo;
@@ -62,7 +63,7 @@ const CaseDelete = ({ caseInfo, handleClose }: Props) => {
                                 sx={{ display: 'flex' }}
                                 primary={`${variable.name}:`}
                                 primaryTypographyProps={{ sx: { mr: 1 }, variant: 'caption' }}
-                                secondary={variable.value}
+                                secondary={renderVariableValue(variable.value).toLocaleString()}
                                 secondaryTypographyProps={{ component: 'span', variant: 'subtitle2' }}
                                 inset
                             />
@@ -71,10 +72,10 @@ const CaseDelete = ({ caseInfo, handleClose }: Props) => {
                 </List>
             </DialogContent>
             <DialogActions>
-                <Button color="primary" onClick={handleClose}>
+                <Button variant="outlined" color="primary" onClick={handleClose}>
                     Cancel
                 </Button>
-                <Button color="error" onClick={handleDelete}>
+                <Button variant="outlined" color="error" onClick={handleDelete}>
                     Ok
                 </Button>
             </DialogActions>

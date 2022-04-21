@@ -4,12 +4,18 @@ import makeStyles from '@mui/styles/makeStyles';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import Checkbox from '@mui/material/Checkbox';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 
 import { StateContext } from '../../store';
@@ -38,8 +44,19 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
 
     const [serverErrors, updateServerErrors] = React.useState<HTTPError>('');
 
+    const pftIndexCount = state.selectedSite?.config?.find((v) => v.name === 'pft_index_count')?.value as
+        | number
+        | undefined;
+
     React.useEffect(() => {
-        updateVariables(initialVariables);
+        if (!variables.included_pft_indices) {
+            updateVariables({
+                ...variables,
+                included_pft_indices: [...Array(pftIndexCount).keys()].map((i) => (i + 1).toString(10))
+            });
+        } else {
+            updateVariables(initialVariables);
+        }
     }, [initialVariables]);
 
     const handleVariableChange = (name: string, value?: VariableValue) => {
@@ -64,7 +81,7 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
             )
             .filter((variable) => variable.value !== undefined && variable.value !== null && variable.value !== '');
         axios
-            .post<CaseWithTaskInfo, AxiosResponse<CaseWithTaskInfo>, CaseEditPayload>(`${API_PATH}/sites`, {
+            .post<CaseWithTaskInfo, AxiosResponse<CaseWithTaskInfo>, CaseEditPayload>(`${API_PATH}/sites/`, {
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 site_name: state.selectedSite!.name,
                 variables: preparedVariables,
@@ -126,7 +143,12 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
                 </Tabs>
                 <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1, justifyContent: 'space-evenly' }}>
                     {state.variablesConfig
-                        .filter((variableConfig) => variableConfig.category === activeTab)
+                        .filter(
+                            (variableConfig) =>
+                                variableConfig.category === activeTab &&
+                                variableConfig.category !== 'fates_param' &&
+                                variableConfig.name !== 'included_pft_indices'
+                        )
                         .map((variableConfig) => (
                             <VariableInput
                                 key={variableConfig.name}
@@ -138,6 +160,69 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
                                 onChange={(value) => handleVariableChange(variableConfig.name, value)}
                             />
                         ))}
+                    {activeTab === 'fates' ? (
+                        <Box>
+                            <Typography variant="h6">FATES Parameters</Typography>
+                            <Table size="small" stickyHeader>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell align="center" size="small">
+                                            Indices
+                                        </TableCell>
+                                        {[...Array(pftIndexCount).keys()].map((idx) => {
+                                            const idxStr = (idx + 1).toString(10);
+                                            return (
+                                                <TableCell key={idx} align="center" size="small">
+                                                    <Checkbox
+                                                        checked={(variables.included_pft_indices as string[]).includes(
+                                                            idxStr
+                                                        )}
+                                                        onChange={(e) => {
+                                                            const newValue = new Set(
+                                                                variables.included_pft_indices as string[]
+                                                            );
+                                                            if (e.target.checked) {
+                                                                newValue.add(idxStr);
+                                                            } else {
+                                                                newValue.delete(idxStr);
+                                                            }
+                                                            handleVariableChange(
+                                                                'included_pft_indices',
+                                                                Array.from(newValue)
+                                                            );
+                                                        }}
+                                                    />
+                                                    {idx + 1}
+                                                </TableCell>
+                                            );
+                                        })}
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {state.variablesConfig
+                                        .filter((variableConfig) => variableConfig.category === 'fates_param')
+                                        .map((variableConfig) => (
+                                            <TableRow key={variableConfig.name}>
+                                                <VariableInput
+                                                    variable={variableConfig}
+                                                    pftIndexCount={pftIndexCount}
+                                                    value={variables[variableConfig.name]}
+                                                    handleError={(hasError: boolean) =>
+                                                        updateVariablesErrors({
+                                                            ...variablesErrors,
+                                                            [variableConfig.name]: hasError
+                                                        })
+                                                    }
+                                                    onChange={(value) =>
+                                                        handleVariableChange(variableConfig.name, value)
+                                                    }
+                                                />
+                                            </TableRow>
+                                        ))}
+                                </TableBody>
+                            </Table>
+                        </Box>
+                    ) : null}
                 </Box>
             </DialogContent>
             <DialogActions>
