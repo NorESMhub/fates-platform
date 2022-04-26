@@ -103,7 +103,7 @@ const CaseListRow = ({ caseInfo, handleEdit, handleDelete }: Props) => {
                 const link = document.createElement('a');
                 link.href = url;
                 const filename =
-                    (resp.headers['content-disposition']?.match(/filename="(.*)"/) || [])[1] || `${caseInfo.id}.tar.gz`;
+                    (resp.headers['content-disposition']?.match(/filename="(.*)"/) || [])[1] || `${caseInfo.id}.zip`;
                 link.setAttribute('download', filename);
                 document.body.appendChild(link);
                 link.click();

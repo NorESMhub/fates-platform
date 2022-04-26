@@ -21,6 +21,7 @@ interface CaseVariableConfig {
         url?: string;
     };
     readonly?: boolean;
+    hidden?: boolean;
     allow_multiple?: boolean;
     validation?: VariableValidation;
     default?: VariableValue;

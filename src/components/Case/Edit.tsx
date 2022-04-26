@@ -146,6 +146,7 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
                         .filter(
                             (variableConfig) =>
                                 variableConfig.category === activeTab &&
+                                !variableConfig.hidden &&
                                 variableConfig.category !== 'fates_param' &&
                                 variableConfig.name !== 'included_pft_indices'
                         )
@@ -200,7 +201,10 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
                                 </TableHead>
                                 <TableBody>
                                     {state.variablesConfig
-                                        .filter((variableConfig) => variableConfig.category === 'fates_param')
+                                        .filter(
+                                            (variableConfig) =>
+                                                variableConfig.category === 'fates_param' && !variableConfig.hidden
+                                        )
                                         .map((variableConfig) => (
                                             <TableRow key={variableConfig.name}>
                                                 <VariableInput
