@@ -10,9 +10,13 @@ export const caseStatusOrders = {
     'SUBMITTED': 9
 };
 
-export const renderVariableValue = (value: VariableValue): VariableValue => {
+export const renderVariableValue = (variables: CaseVariable[], variableConfig: CaseVariableConfig): VariableValue => {
+    let value = variables.find((v) => v.name === variableConfig.name)?.value;
+    if (!value && value !== 0 && value !== false) {
+        value = variableConfig.default || '-';
+    }
     if (Array.isArray(value)) {
         return value.join(', ');
     }
-    return value;
+    return value.toLocaleString();
 };

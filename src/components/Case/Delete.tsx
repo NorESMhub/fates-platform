@@ -57,13 +57,13 @@ const CaseDelete = ({ caseInfo, handleClose }: Props) => {
                 <Typography variant="body1">Compset: {caseInfo.compset}</Typography>
                 <Typography variant="body1">Variables:</Typography>
                 <List dense disablePadding>
-                    {caseInfo.variables.map((variable) => (
-                        <ListItem key={variable.name} disableGutters disablePadding>
+                    {state.variablesConfig.map((variableConfig) => (
+                        <ListItem key={variableConfig.name} disableGutters disablePadding>
                             <ListItemText
                                 sx={{ display: 'flex' }}
-                                primary={`${variable.name}:`}
+                                primary={`${variableConfig.name}:`}
                                 primaryTypographyProps={{ sx: { mr: 1 }, variant: 'caption' }}
-                                secondary={renderVariableValue(variable.value).toLocaleString()}
+                                secondary={renderVariableValue(caseInfo.variables, variableConfig)}
                                 secondaryTypographyProps={{ component: 'span', variant: 'subtitle2' }}
                                 inset
                             />

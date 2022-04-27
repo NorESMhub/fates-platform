@@ -199,11 +199,7 @@ const CaseListRow = ({ caseInfo, handleEdit, handleDelete }: Props) => {
                                     sx={{ pl: 0, display: 'flex' }}
                                     primary={`${variableConfig.name}:`}
                                     primaryTypographyProps={{ sx: { mr: 1 }, variant: 'caption' }}
-                                    secondary={renderVariableValue(
-                                        caseInfo.variables.find((v) => v.name === variableConfig.name)?.value ||
-                                            variableConfig.default ||
-                                            ''
-                                    ).toLocaleString()}
+                                    secondary={renderVariableValue(caseInfo.variables, variableConfig)}
                                     secondaryTypographyProps={{ component: 'span', variant: 'subtitle2' }}
                                     inset
                                 />
