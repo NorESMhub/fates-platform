@@ -61,7 +61,7 @@ const CaseDelete = ({ caseInfo, handleClose }: Props) => {
                         <ListItem key={variableConfig.name} disableGutters disablePadding>
                             <ListItemText
                                 sx={{ display: 'flex' }}
-                                primary={`${variableConfig.name}:`}
+                                primary={`${variableConfig.label || variableConfig.name}:`}
                                 primaryTypographyProps={{ sx: { mr: 1 }, variant: 'caption' }}
                                 secondary={renderVariableValue(caseInfo.variables, variableConfig)}
                                 secondaryTypographyProps={{ component: 'span', variant: 'subtitle2' }}

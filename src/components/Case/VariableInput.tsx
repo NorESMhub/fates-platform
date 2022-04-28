@@ -39,6 +39,8 @@ const VariableInput = ({ variable, pftIndexCount, value, handleError, onChange }
         return (fatesParamValue || defaultValue) as (VariableValue | undefined)[];
     };
 
+    const label = variable.label || variable.name;
+
     const { description } = variable;
     const helperText = (
         <>
@@ -142,7 +144,7 @@ const VariableInput = ({ variable, pftIndexCount, value, handleError, onChange }
             <FormControl size="small" margin="normal">
                 <TextField
                     disabled
-                    label={variable.name}
+                    label={label}
                     helperText={helperText}
                     size="small"
                     margin="dense"
@@ -198,7 +200,7 @@ const VariableInput = ({ variable, pftIndexCount, value, handleError, onChange }
                     disableCloseOnSelect={variable.allow_multiple}
                     filterSelectedOptions
                     renderInput={(params) => (
-                        <TextField {...params} error={hasErrors} size="small" margin="dense" label={variable.name} />
+                        <TextField {...params} error={hasErrors} size="small" margin="dense" label={label} />
                     )}
                     value={
                         value ||
@@ -221,7 +223,7 @@ const VariableInput = ({ variable, pftIndexCount, value, handleError, onChange }
                 <FormControl size="small" margin="normal">
                     <TextField
                         error={hasErrors}
-                        label={variable.name}
+                        label={label}
                         helperText={helperText}
                         size="small"
                         margin="dense"
@@ -241,7 +243,7 @@ const VariableInput = ({ variable, pftIndexCount, value, handleError, onChange }
             return (
                 <FormControl size="small" margin="normal">
                     <DatePicker
-                        label={variable.name}
+                        label={label}
                         inputFormat="yyyy-MM-dd"
                         mask="____-__-__"
                         renderInput={(params) => (
@@ -274,7 +276,7 @@ const VariableInput = ({ variable, pftIndexCount, value, handleError, onChange }
             return (
                 <FormControl size="small" margin="normal">
                     <FormControlLabel
-                        label={variable.name}
+                        label={label}
                         control={
                             <Checkbox
                                 checked={!!(value === undefined ? defaultValue : value)}

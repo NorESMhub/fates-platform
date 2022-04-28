@@ -13,6 +13,7 @@ type VariableCategory = 'ctsm_xml' | 'user_nl_clm' | 'fates' | 'fates_param';
 
 interface CaseVariableConfig {
     name: string;
+    label?: string;
     category: VariableCategory;
     type: VariableType;
     description?: {
