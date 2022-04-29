@@ -204,7 +204,9 @@ const VariableInput = ({ variable, pftIndexCount, value, handleError, onChange }
                     )}
                     value={
                         value ||
-                        (variable.allow_multiple && !Array.isArray(defaultValue) ? [defaultValue] : defaultValue)
+                        (variable.allow_multiple && !Array.isArray(defaultValue)
+                            ? Array(defaultValue === null ? 0 : 1).fill(defaultValue)
+                            : defaultValue)
                     }
                     onChange={(_event, newValue) => {
                         onChange((newValue || undefined) as VariableValue);
