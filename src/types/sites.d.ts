@@ -11,19 +11,22 @@ interface VariableValidation {
 
 type VariableCategory = 'ctsm_xml' | 'user_nl_clm' | 'fates' | 'fates_param';
 
+interface VariableDescription {
+    summary: string;
+    details?: string;
+    url?: string;
+}
+
 interface CaseVariableConfig {
     name: string;
     label?: string;
     category: VariableCategory;
     type: VariableType;
-    description?: {
-        summary: string;
-        details?: string;
-        url?: string;
-    };
+    description?: VariableDescription;
     readonly?: boolean;
     hidden?: boolean;
     allow_multiple?: boolean;
+    count_depends_on?: string;
     validation?: VariableValidation;
     default?: VariableValue;
 }

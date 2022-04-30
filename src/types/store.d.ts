@@ -4,7 +4,6 @@ interface State {
     selectedSite?: SiteProps;
     selectedSiteCases?: CaseWithTaskInfo[];
     variablesConfig: CaseVariableConfig[];
-    popover: PopoverProps;
 }
 
 interface UpdateSites {
@@ -27,12 +26,7 @@ interface UpdateVariablesConfig {
     vars: CaseVariableConfig[];
 }
 
-interface UpdatePopover {
-    type: 'updatePopover';
-    popover: PopoverProps;
-}
-
-type Action = UpdateSites | UpdateSelectedSite | UpdateSelectedSiteCases | UpdateVariablesConfig | UpdatePopover;
+type Action = UpdateSites | UpdateSelectedSite | UpdateSelectedSiteCases | UpdateVariablesConfig;
 
 interface StoreContext {
     state: State;

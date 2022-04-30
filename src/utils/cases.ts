@@ -18,5 +18,5 @@ export const renderVariableValue = (variables: CaseVariable[], variableConfig: C
     if (Array.isArray(value)) {
         return value.join(', ');
     }
-    return value.toLocaleString();
+    return value.toString();
 };

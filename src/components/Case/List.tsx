@@ -11,6 +11,7 @@ import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 
 import { StateContext } from '../../store';
+import InfoPopover from '../InfoPopover';
 import CaseDelete from './Delete';
 import CaseEdit from './Edit';
 import CaseListRow from './ListRow';
@@ -24,6 +25,12 @@ const SiteList = ({ site }: Props) => {
 
     const [editCase, updatedEditCase] = React.useState<CaseWithTaskInfo | null>(null);
     const [deleteCase, updatedDeleteCase] = React.useState<CaseWithTaskInfo | null>(null);
+
+    const [infoPopover, updatedInfoPopover] = React.useState<{
+        anchor: HTMLElement;
+        text: string;
+        url?: string;
+    } | null>(null);
 
     React.useEffect(() => {
         axios.get<CaseWithTaskInfo[]>(`${API_PATH}/sites/${site.name}/cases`).then(({ data }) => {
@@ -57,13 +64,10 @@ const SiteList = ({ site }: Props) => {
                                         <IconButton
                                             size="small"
                                             onClick={(e) =>
-                                                dispatch({
-                                                    type: 'updatePopover',
-                                                    popover: {
-                                                        anchor: e.currentTarget,
-                                                        text: description.text,
-                                                        url: description.url
-                                                    }
+                                                updatedInfoPopover({
+                                                    anchor: e.currentTarget,
+                                                    text: description.text,
+                                                    url: description.url
                                                 })
                                             }
                                         >
@@ -104,6 +108,14 @@ const SiteList = ({ site }: Props) => {
                 />
             ) : null}
             {deleteCase ? <CaseDelete caseInfo={deleteCase} handleClose={() => updatedDeleteCase(null)} /> : null}
+            {infoPopover ? (
+                <InfoPopover
+                    anchor={infoPopover.anchor}
+                    text={infoPopover.text}
+                    url={infoPopover.url}
+                    handleClose={() => updatedInfoPopover(null)}
+                />
+            ) : null}
         </>
     );
 };

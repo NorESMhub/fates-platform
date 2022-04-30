@@ -4,7 +4,7 @@ import Icon from '@mui/material/Icon';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 
-import { StateContext } from '../../store';
+import InfoPopover from '../InfoPopover';
 
 interface Props {
     status?: TaskStatus;
@@ -12,7 +12,11 @@ interface Props {
 }
 
 const Status = ({ status, error }: Props) => {
-    const { dispatch } = React.useContext(StateContext);
+    const [infoPopover, updatedInfoPopover] = React.useState<{
+        anchor: HTMLElement;
+        text: string;
+        url?: string;
+    } | null>(null);
 
     if (!status) {
         return (
@@ -30,20 +34,26 @@ const Status = ({ status, error }: Props) => {
                 </Typography>
                 <IconButton
                     size="small"
-                    onClick={(e) =>
-                        dispatch({
-                            type: 'updatePopover',
-                            popover: {
+                    onClick={(e) => {
+                        error &&
+                            updatedInfoPopover({
                                 anchor: e.currentTarget,
                                 text: error
-                            }
-                        })
-                    }
+                            });
+                    }}
                 >
                     <Icon baseClassName="icons" fontSize="small" color="error">
                         error_outline
                     </Icon>
                 </IconButton>
+                {infoPopover ? (
+                    <InfoPopover
+                        anchor={infoPopover.anchor}
+                        text={infoPopover.text}
+                        url={infoPopover.url}
+                        handleClose={() => updatedInfoPopover(null)}
+                    />
+                ) : null}
             </>
         );
     }

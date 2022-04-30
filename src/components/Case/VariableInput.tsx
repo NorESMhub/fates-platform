@@ -1,29 +1,29 @@
 import { format as formatDate } from 'date-fns';
 import React from 'react';
 import Autocomplete from '@mui/material/Autocomplete';
-import Box from '@mui/material/Box';
 import Checkbox from '@mui/material/Checkbox';
 import FormControl from '@mui/material/FormControl';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormHelperText from '@mui/material/FormHelperText';
-import Link from '@mui/material/Link';
 import TableCell from '@mui/material/TableCell';
 import TextField from '@mui/material/TextField';
-import Typography from '@mui/material/Typography';
 import DatePicker from '@mui/lab/DatePicker';
 
 import { StateContext } from '../../store';
+import { valueExists } from '../../utils/values';
+import InputHelperText from './InputHelperText';
 
 interface Props {
     variable: CaseVariableConfig;
     pftIndexCount?: number;
     value?: VariableValue;
-    handleError: (hasError: boolean) => void;
+    hideHelperText?: boolean;
+    onErrors: (errors: string[]) => void;
     onChange: (value?: VariableValue) => void;
 }
 
-const VariableInput = ({ variable, pftIndexCount, value, handleError, onChange }: Props) => {
-    const { state, dispatch } = React.useContext(StateContext);
+const VariableInput = ({ variable, pftIndexCount, value, hideHelperText, onErrors, onChange }: Props) => {
+    const { state } = React.useContext(StateContext);
 
     const [errors, updateErrors] = React.useState<string[]>([]);
     const hasErrors = errors.length > 0;
@@ -42,44 +42,7 @@ const VariableInput = ({ variable, pftIndexCount, value, handleError, onChange }
     const label = variable.label || variable.name;
 
     const { description } = variable;
-    const helperText = (
-        <>
-            {description ? (
-                <>
-                    {description.summary}
-                    {description.details ? (
-                        <>
-                            &nbsp;
-                            <Link
-                                href="#"
-                                onClick={(e) => {
-                                    dispatch({
-                                        type: 'updatePopover',
-                                        popover: {
-                                            anchor: e.currentTarget,
-                                            text: description.details,
-                                            url: description.url
-                                        }
-                                    });
-                                }}
-                            >
-                                (read more)
-                            </Link>
-                        </>
-                    ) : null}
-                </>
-            ) : null}
-            {errors.length ? (
-                <Box sx={{ display: 'flex', flexDirection: 'column' }} component="span">
-                    {errors.map((error) => (
-                        <Typography key={error} variant="caption" component="span">
-                            {error}
-                        </Typography>
-                    ))}
-                </Box>
-            ) : null}
-        </>
-    );
+    const helperText = hideHelperText ? null : <InputHelperText description={description} errors={errors} />;
 
     const handleChange = (changedValue?: VariableValue) => {
         const variableErrors: string[] = [];
@@ -87,32 +50,32 @@ const VariableInput = ({ variable, pftIndexCount, value, handleError, onChange }
         if (changedValue) {
             const arrayValue = Array.isArray(changedValue) ? changedValue : [changedValue];
 
-            const { name, validation, type } = variable;
+            const { validation, type } = variable;
 
             arrayValue.forEach((v) => {
                 if (validation?.choices?.findIndex((c) => c === v) === -1) {
-                    variableErrors.push(`${name} must be one of ${validation.choices.join(', ')}`);
+                    variableErrors.push(`${label} must be one of ${validation.choices.join(', ')}`);
                 } else if (validation?.pattern && !new RegExp(validation.pattern).test(v.toString())) {
-                    variableErrors.push(`${name} must match pattern ${validation.pattern}`);
+                    variableErrors.push(`${label} must match pattern ${validation.pattern}`);
                 } else if (type === 'integer' || type === 'float') {
                     const numberValue = Number(v);
                     if (Number.isNaN(numberValue)) {
-                        variableErrors.push(`${name} must be a number`);
+                        variableErrors.push(`${label} must be a number`);
                     } else {
                         const minValue = Number(validation?.min);
                         const maxValue = Number(validation?.max);
                         if (!Number.isNaN(minValue) && numberValue < minValue) {
-                            variableErrors.push(`${name} must be greater than or equal to ${minValue}`);
+                            variableErrors.push(`${label} must be greater than or equal to ${minValue}`);
                         }
                         if (maxValue && numberValue > maxValue) {
-                            variableErrors.push(`${name} must be less than or equal to ${maxValue}`);
+                            variableErrors.push(`${label} must be less than or equal to ${maxValue}`);
                         }
                     }
                 }
             });
         }
-        handleError(variableErrors.length > 0);
         updateErrors(variableErrors);
+        onErrors(variableErrors);
         onChange(changedValue);
     };
 
@@ -132,9 +95,11 @@ const VariableInput = ({ variable, pftIndexCount, value, handleError, onChange }
         updateFATESErrors(variableErrors);
         updateFATESParamValue(newValue);
 
-        updateErrors(variableErrors.some((e) => e) ? ['Only accepts number'] : []);
+        const hasFATESErrors = variableErrors.some((e) => e);
+        updateErrors(hasFATESErrors ? ['Only accepts number'] : []);
+        onErrors(hasFATESErrors ? ['Only accepts number'] : []);
 
-        if (!variableErrors.length) {
+        if (!hasFATESErrors) {
             handleChange(newValue as VariableValue);
         }
     };
@@ -164,8 +129,8 @@ const VariableInput = ({ variable, pftIndexCount, value, handleError, onChange }
     if (variable.category === 'fates_param') {
         return (
             <>
-                <TableCell sx={{ borderBottom: 'none ' }} align="center" size="small">
-                    {variable.name}
+                <TableCell sx={{ borderBottom: 'none', maxWidth: 100 }} align="center" size="small">
+                    {label}
                     <FormHelperText error={hasErrors}>{helperText}</FormHelperText>
                 </TableCell>
                 {[...Array(pftIndexCount).keys()].map((idx) => (
@@ -191,6 +156,34 @@ const VariableInput = ({ variable, pftIndexCount, value, handleError, onChange }
     }
 
     if (variable.validation?.choices) {
+        let selectValue;
+        if (variable.allow_multiple) {
+            if (value) {
+                if (Array.isArray(value)) {
+                    selectValue = value.map((v) => {
+                        if (typeof v === 'string' && v.startsWith("'") && v.endsWith("'")) {
+                            return v.slice(1, -1);
+                        }
+                        return v;
+                    });
+                } else if (typeof value === 'string' && value.startsWith("'") && value.endsWith("'")) {
+                    selectValue = [value.slice(1, -1)];
+                } else {
+                    selectValue = [value];
+                }
+            } else {
+                selectValue = defaultValue || [];
+            }
+        } else if (value) {
+            if (typeof value === 'string' && value.startsWith("'") && value.endsWith("'")) {
+                selectValue = value.slice(1, -1);
+            } else {
+                selectValue = value;
+            }
+        } else {
+            selectValue = defaultValue;
+        }
+
         return (
             <FormControl size="small" margin="normal">
                 <Autocomplete
@@ -202,12 +195,7 @@ const VariableInput = ({ variable, pftIndexCount, value, handleError, onChange }
                     renderInput={(params) => (
                         <TextField {...params} error={hasErrors} size="small" margin="dense" label={label} />
                     )}
-                    value={
-                        value ||
-                        (variable.allow_multiple && !Array.isArray(defaultValue)
-                            ? Array(defaultValue === null ? 0 : 1).fill(defaultValue)
-                            : defaultValue)
-                    }
+                    value={selectValue}
                     onChange={(_event, newValue) => {
                         onChange((newValue || undefined) as VariableValue);
                     }}
@@ -281,7 +269,7 @@ const VariableInput = ({ variable, pftIndexCount, value, handleError, onChange }
                         label={label}
                         control={
                             <Checkbox
-                                checked={!!(value === undefined ? defaultValue : value)}
+                                checked={!!(valueExists(value) ? value : defaultValue)}
                                 onChange={(e) => onChange(e.target.checked)}
                             />
                         }

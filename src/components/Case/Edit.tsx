@@ -4,21 +4,18 @@ import makeStyles from '@mui/styles/makeStyles';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import Checkbox from '@mui/material/Checkbox';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 
 import { StateContext } from '../../store';
+import { valueExists } from '../../utils/values';
+import FATESParamsInputs from './FATESParamsInputs';
+import HistoryFieldInputs from './HistoryFieldInputs';
 import VariableInput from './VariableInput';
 
 const useStyles = makeStyles({
@@ -68,18 +65,23 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
 
     const handleSubmit = () => {
         const preparedVariables: CaseVariable[] = state.variablesConfig
-            .map(
-                (variableConfig) =>
-                    ({
-                        name: variableConfig.name,
-                        value:
-                            variables[variableConfig.name] !== undefined
-                                ? variables[variableConfig.name]
-                                : state.selectedSite?.config?.find((variable) => variable.name === variableConfig.name)
-                                      ?.value || variableConfig.default
-                    } as CaseVariable)
-            )
-            .filter((variable) => variable.value !== undefined && variable.value !== null && variable.value !== '');
+            .map((variableConfig) => {
+                const defaultValue =
+                    state.selectedSite?.config?.find((variable) => variable.name === variableConfig.name)?.value ||
+                    variableConfig.default;
+                let value = valueExists(variables[variableConfig.name]) ? variables[variableConfig.name] : defaultValue;
+                if (variableConfig.category === 'fates_param' && value) {
+                    const fatesParamDefaultValue = defaultValue as number[];
+                    value = (value as Array<string | number>).map((v, idx) =>
+                        parseFloat((v || (fatesParamDefaultValue[idx] as number)).toString(10))
+                    );
+                }
+                return {
+                    name: variableConfig.name,
+                    value
+                } as CaseVariable;
+            })
+            .filter((variable) => valueExists(variable.value));
         axios
             .post<CaseWithTaskInfo, AxiosResponse<CaseWithTaskInfo>, CaseEditPayload>(`${API_PATH}/sites/`, {
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -147,85 +149,56 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
                             (variableConfig) =>
                                 variableConfig.category === activeTab &&
                                 !variableConfig.hidden &&
+                                !variableConfig.count_depends_on &&
                                 variableConfig.category !== 'fates_param' &&
                                 variableConfig.name !== 'included_pft_indices'
                         )
-                        .map((variableConfig) => (
-                            <VariableInput
-                                key={variableConfig.name}
-                                variable={variableConfig}
-                                value={variables[variableConfig.name]}
-                                handleError={(hasError: boolean) =>
-                                    updateVariablesErrors({ ...variablesErrors, [variableConfig.name]: hasError })
-                                }
-                                onChange={(value) => handleVariableChange(variableConfig.name, value)}
-                            />
-                        ))}
-                    {activeTab === 'fates' ? (
-                        <Box>
-                            <Typography variant="h6">FATES Parameters</Typography>
-                            <Table size="small" stickyHeader>
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell align="center" size="small">
-                                            Indices
-                                        </TableCell>
-                                        {[...Array(pftIndexCount).keys()].map((idx) => {
-                                            const idxStr = (idx + 1).toString(10);
-                                            return (
-                                                <TableCell key={idx} align="center" size="small">
-                                                    <Checkbox
-                                                        checked={(variables.included_pft_indices as string[]).includes(
-                                                            idxStr
-                                                        )}
-                                                        onChange={(e) => {
-                                                            const newValue = new Set(
-                                                                variables.included_pft_indices as string[]
-                                                            );
-                                                            if (e.target.checked) {
-                                                                newValue.add(idxStr);
-                                                            } else {
-                                                                newValue.delete(idxStr);
-                                                            }
-                                                            handleVariableChange(
-                                                                'included_pft_indices',
-                                                                Array.from(newValue)
-                                                            );
-                                                        }}
-                                                    />
-                                                    {idx + 1}
-                                                </TableCell>
-                                            );
-                                        })}
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {state.variablesConfig
-                                        .filter(
-                                            (variableConfig) =>
-                                                variableConfig.category === 'fates_param' && !variableConfig.hidden
-                                        )
-                                        .map((variableConfig) => (
-                                            <TableRow key={variableConfig.name}>
-                                                <VariableInput
-                                                    variable={variableConfig}
-                                                    pftIndexCount={pftIndexCount}
-                                                    value={variables[variableConfig.name]}
-                                                    handleError={(hasError: boolean) =>
-                                                        updateVariablesErrors({
-                                                            ...variablesErrors,
-                                                            [variableConfig.name]: hasError
-                                                        })
-                                                    }
-                                                    onChange={(value) =>
-                                                        handleVariableChange(variableConfig.name, value)
-                                                    }
-                                                />
-                                            </TableRow>
-                                        ))}
-                                </TableBody>
-                            </Table>
-                        </Box>
+                        .map((variableConfig) => {
+                            const value = variables[variableConfig.name];
+                            return (
+                                <React.Fragment key={variableConfig.name}>
+                                    <VariableInput
+                                        key={variableConfig.name}
+                                        variable={variableConfig}
+                                        value={value}
+                                        onErrors={(errors: string[]) =>
+                                            updateVariablesErrors({
+                                                ...variablesErrors,
+                                                [variableConfig.name]: errors.length > 0
+                                            })
+                                        }
+                                        onChange={(newValue) => handleVariableChange(variableConfig.name, newValue)}
+                                    />
+                                    {variableConfig.name.startsWith('hist_fincl') &&
+                                    (variables[variableConfig.name] as string[] | undefined)?.length ? (
+                                        <HistoryFieldInputs
+                                            parentVariable={variableConfig}
+                                            parentVariableValue={value as string[]}
+                                            variables={variables}
+                                            handleVariableChange={handleVariableChange}
+                                            handleVariableErrors={(name, hasError) => {
+                                                updateVariablesErrors({
+                                                    ...variablesErrors,
+                                                    [name]: hasError
+                                                });
+                                            }}
+                                        />
+                                    ) : null}
+                                </React.Fragment>
+                            );
+                        })}
+                    {activeTab === 'fates' && pftIndexCount ? (
+                        <FATESParamsInputs
+                            pftIndexCount={pftIndexCount}
+                            variables={variables}
+                            handleVariableChange={handleVariableChange}
+                            handleVariableErrors={(name, hasError) => {
+                                updateVariablesErrors({
+                                    ...variablesErrors,
+                                    [name]: hasError
+                                });
+                            }}
+                        />
                     ) : null}
                 </Box>
             </DialogContent>

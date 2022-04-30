@@ -8,8 +8,7 @@ export const initialState: State = {
     sitesBounds: new maplibre.LngLatBounds([-180, -90], [180, 90]),
     selectedSite: undefined,
     selectedSiteCases: undefined,
-    variablesConfig: [],
-    popover: {}
+    variablesConfig: []
 };
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -39,12 +38,6 @@ export const reducers = (state: State, action: Action): State => {
             return {
                 ...state,
                 variablesConfig: action.vars
-            };
-        }
-        case 'updatePopover': {
-            return {
-                ...state,
-                popover: action.popover
             };
         }
     }
