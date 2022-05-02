@@ -41,7 +41,7 @@ jobs:
           BUILDNUMBER: ${{ github.run_number }}
           GITSHA1: ${{ github.sha }}
         with:
-          name: ka7eh/fates-platform
+          name: NorESMhub/fates-platform
           tags: "${{ env.TAGS }}"
           buildargs: BRANCH,BUILDNUMBER,GITSHA1,PUBLIC_PATH,API_SERVER
           dockerfile: docker/Dockerfile
