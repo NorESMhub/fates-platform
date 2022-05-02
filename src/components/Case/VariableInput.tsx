@@ -10,7 +10,7 @@ import TextField from '@mui/material/TextField';
 import DatePicker from '@mui/lab/DatePicker';
 
 import { StateContext } from '../../store';
-import { valueExists } from '../../utils/values';
+import { valueExists } from '../../utils/cases';
 import InputHelperText from './InputHelperText';
 
 interface Props {
@@ -160,14 +160,7 @@ const VariableInput = ({ variable, pftIndexCount, value, hideHelperText, onError
         if (variable.allow_multiple) {
             if (value) {
                 if (Array.isArray(value)) {
-                    selectValue = value.map((v) => {
-                        if (typeof v === 'string' && v.startsWith("'") && v.endsWith("'")) {
-                            return v.slice(1, -1);
-                        }
-                        return v;
-                    });
-                } else if (typeof value === 'string' && value.startsWith("'") && value.endsWith("'")) {
-                    selectValue = [value.slice(1, -1)];
+                    selectValue = value;
                 } else {
                     selectValue = [value];
                 }
@@ -175,11 +168,7 @@ const VariableInput = ({ variable, pftIndexCount, value, hideHelperText, onError
                 selectValue = defaultValue || [];
             }
         } else if (value) {
-            if (typeof value === 'string' && value.startsWith("'") && value.endsWith("'")) {
-                selectValue = value.slice(1, -1);
-            } else {
-                selectValue = value;
-            }
+            selectValue = value;
         } else {
             selectValue = defaultValue;
         }
@@ -187,6 +176,7 @@ const VariableInput = ({ variable, pftIndexCount, value, hideHelperText, onError
         return (
             <FormControl size="small" margin="normal">
                 <Autocomplete
+                    sx={{ minWidth: 225 }}
                     multiple={variable.allow_multiple}
                     options={variable.validation.choices}
                     getOptionLabel={(option) => option?.toString() || ''}

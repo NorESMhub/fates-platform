@@ -9,7 +9,7 @@ import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 
 import { StateContext } from '../../store';
-import { valueExists } from '../../utils/values';
+import { valueExists } from '../../utils/cases';
 import InputHelperText from './InputHelperText';
 import VariableInput from './VariableInput';
 

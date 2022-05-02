@@ -10,9 +10,11 @@ export const caseStatusOrders = {
     'SUBMITTED': 9
 };
 
+export const valueExists = (value: unknown): boolean => value !== undefined && value !== null && value !== '';
+
 export const renderVariableValue = (variables: CaseVariable[], variableConfig: CaseVariableConfig): VariableValue => {
     let value = variables.find((v) => v.name === variableConfig.name)?.value;
-    if (!value && value !== 0 && value !== false) {
+    if (!valueExists(value)) {
         value = variableConfig.default || '-';
     }
     if (Array.isArray(value)) {

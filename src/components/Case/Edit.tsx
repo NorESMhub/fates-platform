@@ -13,7 +13,7 @@ import Tabs from '@mui/material/Tabs';
 import Typography from '@mui/material/Typography';
 
 import { StateContext } from '../../store';
-import { valueExists } from '../../utils/values';
+import { valueExists } from '../../utils/cases';
 import FATESParamsInputs from './FATESParamsInputs';
 import HistoryFieldInputs from './HistoryFieldInputs';
 import VariableInput from './VariableInput';
