@@ -44,11 +44,13 @@ const VariableInput = ({ variable, pftIndexCount, value, hideHelperText, onError
     const { description } = variable;
     const helperText = hideHelperText ? null : <InputHelperText description={description} errors={errors} />;
 
-    const handleChange = (changedValue?: VariableValue) => {
+    const handleChange = (inputValue?: VariableValue | Date | null) => {
         const variableErrors: string[] = [];
 
+        let changedValue = inputValue;
+
         if (changedValue) {
-            const arrayValue = Array.isArray(changedValue) ? changedValue : [changedValue];
+            const arrayValue: Array<Date | VariableValue> = Array.isArray(changedValue) ? changedValue : [changedValue];
 
             const { validation, type } = variable;
 
@@ -71,11 +73,25 @@ const VariableInput = ({ variable, pftIndexCount, value, hideHelperText, onError
                             variableErrors.push(`${label} must be less than or equal to ${maxValue}`);
                         }
                     }
+                } else if (type === 'date') {
+                    let newDate = v as Date | string | undefined;
+                    if (v) {
+                        if (v instanceof Date) {
+                            if (!Number.isNaN(v.valueOf())) {
+                                newDate = formatDate(v, 'yyyy-MM-dd');
+                            } else {
+                                variableErrors.push(`${label} must be a valid date`);
+                            }
+                        }
+                    }
+                    changedValue = newDate;
                 }
             });
         }
         updateErrors(variableErrors);
         onErrors(variableErrors);
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         onChange(changedValue);
     };
 
@@ -129,7 +145,7 @@ const VariableInput = ({ variable, pftIndexCount, value, hideHelperText, onError
     if (variable.category === 'fates_param') {
         return (
             <>
-                <TableCell sx={{ borderBottom: 'none', maxWidth: 100 }} align="center" size="small">
+                <TableCell sx={{ borderBottom: 'none' }} align="center" size="small">
                     {label}
                     <FormHelperText error={hasErrors}>{helperText}</FormHelperText>
                 </TableCell>
@@ -248,7 +264,9 @@ const VariableInput = ({ variable, pftIndexCount, value, hideHelperText, onError
                         /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
                         // @ts-ignore-next-line
                         value={value || defaultValue}
-                        onChange={(v: Date | null) => onChange(v ? formatDate(v, 'yyyy-MM-dd') : undefined)}
+                        onChange={(v: Date | null) => {
+                            handleChange(v);
+                        }}
                     />
                 </FormControl>
             );
