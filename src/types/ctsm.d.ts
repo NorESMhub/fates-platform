@@ -31,6 +31,7 @@ interface CaseVariableConfig {
     readonly?: boolean;
     hidden?: boolean;
     allow_multiple?: boolean;
+    allow_custom?: boolean;
     count_depends_on?: string;
     validation?: VariableValidation;
     default?: VariableValue;

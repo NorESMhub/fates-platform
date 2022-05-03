@@ -52,11 +52,16 @@ const VariableInput = ({ variable, pftIndexCount, value, hideHelperText, onError
         if (changedValue) {
             const arrayValue: Array<Date | VariableValue> = Array.isArray(changedValue) ? changedValue : [changedValue];
 
-            const { validation, type } = variable;
+            const { validation, type, allow_custom } = variable;
 
+            const choices = [...(validation?.choices || [])];
             arrayValue.forEach((v) => {
-                if (validation?.choices?.findIndex((c) => c === v) === -1) {
-                    variableErrors.push(`${label} must be one of ${validation.choices.join(', ')}`);
+                if (allow_custom) {
+                    choices.push(v as string | number);
+                }
+
+                if (validation?.choices && choices.findIndex((c) => c === v) === -1) {
+                    variableErrors.push(`${label} must be one of ${choices.join(', ')}`);
                 } else if (validation?.pattern && !new RegExp(validation.pattern).test(v.toString())) {
                     variableErrors.push(`${label} must match pattern ${validation.pattern}`);
                 } else if (type === 'integer' || type === 'float') {
@@ -194,6 +199,7 @@ const VariableInput = ({ variable, pftIndexCount, value, hideHelperText, onError
                 <Autocomplete
                     sx={{ minWidth: 225 }}
                     multiple={variable.allow_multiple}
+                    freeSolo={variable.allow_custom}
                     options={variable.validation.choices}
                     getOptionLabel={(option) => option?.toString() || ''}
                     disableCloseOnSelect={variable.allow_multiple}
@@ -203,7 +209,7 @@ const VariableInput = ({ variable, pftIndexCount, value, hideHelperText, onError
                     )}
                     value={selectValue}
                     onChange={(_event, newValue) => {
-                        onChange((newValue || undefined) as VariableValue);
+                        handleChange((newValue || undefined) as VariableValue);
                     }}
                 />
                 <FormHelperText>{helperText}</FormHelperText>
