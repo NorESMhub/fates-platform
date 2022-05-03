@@ -1,3 +1,8 @@
+interface CTSMInfo {
+    model: string;
+    version: string;
+}
+
 type VariableType = 'char' | 'integer' | 'float' | 'logical' | 'date';
 
 type VariableValue = string | number | boolean | Array<string | number | boolean>;

@@ -4,6 +4,7 @@ import maplibre from 'maplibre-gl';
 import { getSitesBounds } from './utils/sites';
 
 export const initialState: State = {
+    ctsmInfo: undefined,
     sites: undefined,
     sitesBounds: new maplibre.LngLatBounds([-180, -90], [180, 90]),
     selectedSite: undefined,
@@ -16,6 +17,11 @@ export const StateContext = React.createContext<StoreContext>({ state: initialSt
 
 export const reducers = (state: State, action: Action): State => {
     switch (action.type) {
+        case 'updateCTSMInfo':
+            return {
+                ...state,
+                ctsmInfo: action.info
+            };
         case 'updateSites':
             return {
                 ...state,

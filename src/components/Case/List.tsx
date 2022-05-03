@@ -52,9 +52,24 @@ const SiteList = ({ site }: Props) => {
                                 { label: 'Case ID' },
                                 { label: 'Status' },
                                 { label: 'Date Created' },
-                                { label: 'Grid', description: { text: '[PLACEHOLDER_TEXT]' } },
-                                { label: 'Compset', description: { text: '[PLACEHOLDER_TEXT]' } },
-                                { label: 'Variables', description: { text: '[PLACEHOLDER_TEXT]' } }
+                                {
+                                    label: 'Grid',
+                                    description: {
+                                        text: 'The size and site of your case. 1x1 denotes a single model grid cell.'
+                                    }
+                                },
+                                {
+                                    label: 'Compset',
+                                    description: {
+                                        text: 'Short for component sets. Compsets specify which component models are used as well as specific settings for forcing scenarios and physics options for the atmosphere (atm), land (lnd), sea-ice (ice), ocean (ocn), river runoff (rof), land-ice (glc), and waves (wav).'
+                                    }
+                                },
+                                {
+                                    label: 'Variables',
+                                    description: {
+                                        text: "A record of the settings for the case as specified when it was created ('CREATE CASE' button). Press 'EDIT' to change some of these settings and add a new case to the list."
+                                    }
+                                }
                             ] as Array<{ label: string; description: { text: string; url?: string } }>
                         ).map(({ label, description }) => (
                             <TableCell key={label} align="center">

@@ -22,6 +22,13 @@ const App = (): JSX.Element => {
     );
 
     React.useEffect(() => {
+        axios.get<CTSMInfo>(`${API_PATH}/cases/ctsm-info`).then(({ data }) => {
+            dispatch({
+                type: 'updateCTSMInfo',
+                info: data
+            });
+        });
+
         axios
             .get<Sites>(`${API_PATH}/sites`)
             .then(({ data }) => {

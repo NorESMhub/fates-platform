@@ -1,9 +1,3 @@
-interface PopoverProps {
-    anchor?: HTMLElement;
-    text?: string;
-    url?: string;
-}
-
 interface SchemaError {
     loc: string[];
     msg: string;

@@ -1,9 +1,15 @@
 interface State {
+    ctsmInfo?: CTSMInfo;
     sites?: Sites;
     sitesBounds: maplibregl.LngLatBoundsLike;
     selectedSite?: SiteProps;
     selectedSiteCases?: CaseWithTaskInfo[];
     variablesConfig: CaseVariableConfig[];
+}
+
+interface UpdateCTSMInfo {
+    type: 'updateCTSMInfo';
+    info: CTSMInfo;
 }
 
 interface UpdateSites {
@@ -26,7 +32,7 @@ interface UpdateVariablesConfig {
     vars: CaseVariableConfig[];
 }
 
-type Action = UpdateSites | UpdateSelectedSite | UpdateSelectedSiteCases | UpdateVariablesConfig;
+type Action = UpdateCTSMInfo | UpdateSites | UpdateSelectedSite | UpdateSelectedSiteCases | UpdateVariablesConfig;
 
 interface StoreContext {
     state: State;
