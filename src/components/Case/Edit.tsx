@@ -15,7 +15,7 @@ import Typography from '@mui/material/Typography';
 import { StateContext } from '../../store';
 import { valueExists } from '../../utils/cases';
 import FATESParamsInputs from './FATESParamsInputs';
-import HistoryFieldInputs from './HistoryFieldInputs';
+import HistoryInputs from './HistoryInputs';
 import VariableInput from './VariableInput';
 
 const useStyles = makeStyles({
@@ -141,6 +141,7 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
                 <Tabs value={activeTab} onChange={(_e, tab) => updateActiveTab(tab)}>
                     <Tab label="CTSM" value="ctsm_xml" />
                     <Tab label="Namelist - CLM" value="user_nl_clm" />
+                    <Tab label="Namelist - CLM - History" value="user_nl_clm_history_file" />
                     <Tab label="FATES" value="fates" />
                 </Tabs>
                 <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1, justifyContent: 'space-evenly' }}>
@@ -150,6 +151,7 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
                                 variableConfig.category === activeTab &&
                                 !variableConfig.hidden &&
                                 !variableConfig.count_depends_on &&
+                                variableConfig.category !== 'user_nl_clm_history_file' &&
                                 variableConfig.category !== 'fates_param' &&
                                 variableConfig.name !== 'included_pft_indices'
                         )
@@ -169,24 +171,21 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
                                         }
                                         onChange={(newValue) => handleVariableChange(variableConfig.name, newValue)}
                                     />
-                                    {variableConfig.name.startsWith('hist_fincl') &&
-                                    (variables[variableConfig.name] as string[] | undefined)?.length ? (
-                                        <HistoryFieldInputs
-                                            parentVariable={variableConfig}
-                                            parentVariableValue={value as string[]}
-                                            variables={variables}
-                                            handleVariableChange={handleVariableChange}
-                                            handleVariableErrors={(name, hasError) => {
-                                                updateVariablesErrors({
-                                                    ...variablesErrors,
-                                                    [name]: hasError
-                                                });
-                                            }}
-                                        />
-                                    ) : null}
                                 </React.Fragment>
                             );
                         })}
+                    {activeTab === 'user_nl_clm_history_file' ? (
+                        <HistoryInputs
+                            variables={variables}
+                            handleVariableChange={handleVariableChange}
+                            handleVariableErrors={(name: string, hasError: boolean) =>
+                                updateVariablesErrors({
+                                    ...variablesErrors,
+                                    [name]: hasError
+                                })
+                            }
+                        />
+                    ) : null}
                     {activeTab === 'fates' && pftIndexCount ? (
                         <FATESParamsInputs
                             pftIndexCount={pftIndexCount}

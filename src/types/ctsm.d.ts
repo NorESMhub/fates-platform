@@ -11,10 +11,11 @@ interface VariableValidation {
     min?: number;
     max?: number;
     pattern?: string;
+    pattern_error?: string;
     choices?: Array<string | number>;
 }
 
-type VariableCategory = 'ctsm_xml' | 'user_nl_clm' | 'fates' | 'fates_param';
+type VariableCategory = 'ctsm_xml' | 'user_nl_clm' | 'user_nl_clm_history_file' | 'fates' | 'fates_param';
 
 interface VariableDescription {
     summary: string;

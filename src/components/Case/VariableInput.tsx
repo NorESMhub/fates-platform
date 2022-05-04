@@ -17,12 +17,13 @@ interface Props {
     variable: CaseVariableConfig;
     pftIndexCount?: number;
     value?: VariableValue;
+    hideLabel?: boolean;
     hideHelperText?: boolean;
     onErrors: (errors: string[]) => void;
     onChange: (value?: VariableValue) => void;
 }
 
-const VariableInput = ({ variable, pftIndexCount, value, hideHelperText, onErrors, onChange }: Props) => {
+const VariableInput = ({ variable, pftIndexCount, value, hideLabel, hideHelperText, onErrors, onChange }: Props) => {
     const { state } = React.useContext(StateContext);
 
     const [errors, updateErrors] = React.useState<string[]>([]);
@@ -63,7 +64,11 @@ const VariableInput = ({ variable, pftIndexCount, value, hideHelperText, onError
                 if (validation?.choices && choices.findIndex((c) => c === v) === -1) {
                     variableErrors.push(`${label} must be one of ${choices.join(', ')}`);
                 } else if (validation?.pattern && !new RegExp(validation.pattern).test(v.toString())) {
-                    variableErrors.push(`${label} must match pattern ${validation.pattern}`);
+                    if (validation?.pattern_error) {
+                        variableErrors.push(validation.pattern_error);
+                    } else {
+                        variableErrors.push(`${label} must match ${validation.pattern}`);
+                    }
                 } else if (type === 'integer' || type === 'float') {
                     const numberValue = Number(v);
                     if (Number.isNaN(numberValue)) {
@@ -130,7 +135,7 @@ const VariableInput = ({ variable, pftIndexCount, value, hideHelperText, onError
             <FormControl size="small" margin="normal">
                 <TextField
                     disabled
-                    label={label}
+                    label={hideLabel ? null : label}
                     helperText={helperText}
                     size="small"
                     margin="dense"
@@ -155,7 +160,7 @@ const VariableInput = ({ variable, pftIndexCount, value, hideHelperText, onError
                     <FormHelperText error={hasErrors}>{helperText}</FormHelperText>
                 </TableCell>
                 {[...Array(pftIndexCount).keys()].map((idx) => (
-                    <TableCell key={idx} sx={{ borderBottom: 'none ' }} align="center" size="small">
+                    <TableCell key={idx} sx={{ borderBottom: 'none' }} align="center" size="small">
                         <TextField
                             error={fatesErrors[idx]}
                             size="small"
@@ -205,7 +210,13 @@ const VariableInput = ({ variable, pftIndexCount, value, hideHelperText, onError
                     disableCloseOnSelect={variable.allow_multiple}
                     filterSelectedOptions
                     renderInput={(params) => (
-                        <TextField {...params} error={hasErrors} size="small" margin="dense" label={label} />
+                        <TextField
+                            {...params}
+                            error={hasErrors}
+                            size="small"
+                            margin="dense"
+                            label={hideLabel ? null : label}
+                        />
                     )}
                     value={selectValue}
                     onChange={(_event, newValue) => {
@@ -225,7 +236,7 @@ const VariableInput = ({ variable, pftIndexCount, value, hideHelperText, onError
                 <FormControl size="small" margin="normal">
                     <TextField
                         error={hasErrors}
-                        label={label}
+                        label={hideLabel ? null : label}
                         helperText={helperText}
                         size="small"
                         margin="dense"
@@ -245,7 +256,7 @@ const VariableInput = ({ variable, pftIndexCount, value, hideHelperText, onError
             return (
                 <FormControl size="small" margin="normal">
                     <DatePicker
-                        label={label}
+                        label={hideLabel ? null : label}
                         inputFormat="yyyy-MM-dd"
                         mask="____-__-__"
                         renderInput={(params) => (
@@ -280,7 +291,7 @@ const VariableInput = ({ variable, pftIndexCount, value, hideHelperText, onError
             return (
                 <FormControl size="small" margin="normal">
                     <FormControlLabel
-                        label={label}
+                        label={hideLabel ? null : label}
                         control={
                             <Checkbox
                                 checked={!!(valueExists(value) ? value : defaultValue)}
