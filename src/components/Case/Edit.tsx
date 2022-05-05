@@ -150,7 +150,6 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
                             (variableConfig) =>
                                 variableConfig.category === activeTab &&
                                 !variableConfig.hidden &&
-                                !variableConfig.count_depends_on &&
                                 variableConfig.category !== 'user_nl_clm_history_file' &&
                                 variableConfig.category !== 'fates_param' &&
                                 variableConfig.name !== 'included_pft_indices'

@@ -58,11 +58,11 @@ const VariableInput = ({ variable, pftIndexCount, value, hideLabel, hideHelperTe
             const choices = [...(validation?.choices || [])];
             arrayValue.forEach((v) => {
                 if (allow_custom) {
-                    choices.push(v as string | number);
+                    choices.push({ value: v as VariableValue, label: v.toString() });
                 }
 
-                if (validation?.choices && choices.findIndex((c) => c === v) === -1) {
-                    variableErrors.push(`${label} must be one of ${choices.join(', ')}`);
+                if (validation?.choices && choices.findIndex((c) => c.value === v) === -1) {
+                    variableErrors.push(`${label} must be one of ${choices.map((c) => c.label).join(', ')}`);
                 } else if (validation?.pattern && !new RegExp(validation.pattern).test(v.toString())) {
                     if (validation?.pattern_error) {
                         variableErrors.push(validation.pattern_error);
@@ -182,32 +182,68 @@ const VariableInput = ({ variable, pftIndexCount, value, hideLabel, hideHelperTe
     }
 
     if (variable.validation?.choices) {
-        let selectValue;
+        const { choices } = variable.validation;
+
         if (variable.allow_multiple) {
-            if (value) {
-                if (Array.isArray(value)) {
-                    selectValue = value;
-                } else {
-                    selectValue = [value];
-                }
-            } else {
-                selectValue = defaultValue || [];
-            }
-        } else if (value) {
-            selectValue = value;
-        } else {
-            selectValue = defaultValue;
+            const autocompleteValues: VariableValue[] = [];
+            const autocompleteValuesObject: VariableChoice[] = [];
+            ((valueExists(value) ? value : defaultValue || []) as VariableValue[]).forEach((v) => {
+                autocompleteValues.push(v.toString());
+                autocompleteValuesObject.push({
+                    value: v,
+                    label: choices.find((c) => c.value === v)?.label || v.toString()
+                });
+            });
+
+            return (
+                <FormControl size="small" margin="normal">
+                    <Autocomplete
+                        sx={{ minWidth: 225 }}
+                        multiple
+                        freeSolo={variable.allow_custom}
+                        options={choices}
+                        disableCloseOnSelect={variable.allow_multiple}
+                        filterOptions={() => choices.filter((c) => !autocompleteValues.includes(c.value))}
+                        filterSelectedOptions
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                error={hasErrors}
+                                size="small"
+                                margin="dense"
+                                label={hideLabel ? null : label}
+                                InputLabelProps={{ ...params.InputLabelProps, shrink: true }}
+                                InputProps={{
+                                    ...params.InputProps,
+                                    notched: true,
+                                    placeholder: variable.placeholder
+                                }}
+                            />
+                        )}
+                        value={autocompleteValuesObject}
+                        onChange={(_event, newValue) => {
+                            handleChange(newValue.map((v) => (typeof v === 'string' ? v : v.value)) as VariableValue);
+                        }}
+                    />
+                    <FormHelperText>{helperText}</FormHelperText>
+                </FormControl>
+            );
         }
+
+        const autocompleteValueObject = valueExists(value)
+            ? {
+                  value,
+                  label: choices.find((c) => c.value === value)?.label || value?.toString() || ''
+              }
+            : defaultValue;
 
         return (
             <FormControl size="small" margin="normal">
                 <Autocomplete
                     sx={{ minWidth: 225 }}
-                    multiple={variable.allow_multiple}
                     freeSolo={variable.allow_custom}
-                    options={variable.validation.choices}
-                    getOptionLabel={(option) => option?.toString() || ''}
-                    disableCloseOnSelect={variable.allow_multiple}
+                    options={choices}
+                    filterOptions={() => choices.filter((c) => c.value !== value)}
                     filterSelectedOptions
                     renderInput={(params) => (
                         <TextField
@@ -216,11 +252,22 @@ const VariableInput = ({ variable, pftIndexCount, value, hideLabel, hideHelperTe
                             size="small"
                             margin="dense"
                             label={hideLabel ? null : label}
+                            InputLabelProps={{ ...params.InputLabelProps, shrink: true }}
+                            InputProps={{
+                                ...params.InputProps,
+                                notched: true,
+                                placeholder: variable.placeholder
+                            }}
                         />
                     )}
-                    value={selectValue}
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-ignore
+                    isOptionEqualToValue={(option, v) => option.value === v.value}
+                    value={autocompleteValueObject}
                     onChange={(_event, newValue) => {
-                        handleChange((newValue || undefined) as VariableValue);
+                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                        // @ts-ignore
+                        handleChange(newValue?.value);
                     }}
                 />
                 <FormHelperText>{helperText}</FormHelperText>

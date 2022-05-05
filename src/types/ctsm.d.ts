@@ -7,12 +7,17 @@ type VariableType = 'char' | 'integer' | 'float' | 'logical' | 'date';
 
 type VariableValue = string | number | boolean | Array<string | number | boolean>;
 
+interface VariableChoice {
+    value: VariableValue;
+    label: string;
+}
+
 interface VariableValidation {
     min?: number;
     max?: number;
     pattern?: string;
     pattern_error?: string;
-    choices?: Array<string | number>;
+    choices?: VariableChoice[];
 }
 
 type VariableCategory = 'ctsm_xml' | 'user_nl_clm' | 'user_nl_clm_history_file' | 'fates' | 'fates_param';
@@ -33,9 +38,9 @@ interface CaseVariableConfig {
     hidden?: boolean;
     allow_multiple?: boolean;
     allow_custom?: boolean;
-    count_depends_on?: string;
     validation?: VariableValidation;
     default?: VariableValue;
+    placeholder?: string;
 }
 
 interface CaseVariable {

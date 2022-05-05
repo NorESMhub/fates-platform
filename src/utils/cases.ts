@@ -20,5 +20,8 @@ export const renderVariableValue = (variables: CaseVariable[], variableConfig: C
     if (Array.isArray(value)) {
         return value.join(', ');
     }
+
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     return value.toString();
 };
