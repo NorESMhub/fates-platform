@@ -1,18 +1,42 @@
-const basemapSource: maplibregl.RasterSourceSpecification = {
-    type: 'raster',
-    tiles: ['//server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}'],
-    tileSize: 256,
-    attribution:
-        'Sources: Esri, HERE, Garmin, Intermap, increment P Corp., GEBCO, USGS, FAO, NPS, NRCAN, GeoBase, IGN, Kadaster NL, Ordnance Survey, Esri Japan, METI, Esri China (Hong Kong), (c) OpenStreetMap contributors, and the GIS User Community'
-};
+import { MapLibreBasemapsControlOptions } from 'maplibre-gl-basemaps';
 
-const basemapLayer: maplibregl.RasterLayerSpecification = {
-    id: 'basemap',
-    type: 'raster',
-    source: 'basemap',
-    minzoom: 0,
-    maxzoom: 22
-};
+export const basemaps = {
+    basemaps: [
+        {
+            id: 'OSM',
+            tiles: [
+                'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                'https://b.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png'
+            ],
+            sourceExtraParams: {
+                attribution:
+                    '&#169; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors.'
+            }
+        },
+        {
+            id: 'Carto',
+            tiles: [
+                'https://a.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}.png',
+                'https://b.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}.png',
+                'https://c.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}.png',
+                'https://d.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}.png'
+            ],
+            sourceExtraParams: {
+                attribution: '&#169; <a href="https://www.carto.com">Carto</a>'
+            }
+        },
+        {
+            id: 'World_Imagery',
+            tiles: ['https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
+            sourceExtraParams: {
+                attribution: 'Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community'
+            }
+        }
+    ],
+    initialBasemap: 'OSM',
+    expandDirection: 'top'
+} as MapLibreBasemapsControlOptions;
 
 export const layerStyles: { [group: string]: { [state: string]: Partial<maplibregl.LayerSpecification> } } = {
     sites: {
@@ -32,8 +56,8 @@ export const layerStyles: { [group: string]: { [state: string]: Partial<maplibre
                     ['boolean', ['feature-state', 'selected'], false],
                     '#ff0000',
                     ['boolean', ['feature-state', 'hovered'], false],
-                    '#a06f35',
-                    '#002e2c'
+                    '#e75c06',
+                    '#bf8e14'
                 ],
                 'circle-opacity': [
                     'case',
@@ -50,8 +74,6 @@ export const layerStyles: { [group: string]: { [state: string]: Partial<maplibre
 
 export const mapStyle: maplibregl.StyleSpecification = {
     version: 8,
-    sources: {
-        basemap: basemapSource
-    },
-    layers: [basemapLayer]
+    sources: {},
+    layers: []
 };

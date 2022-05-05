@@ -9,7 +9,7 @@ import { StateContext } from '../../store';
 import { HEADER_HEIGHT } from '../../theme';
 import Header from './Header';
 import Map from '../Map';
-import { layerStyles, mapStyle } from '../Map/styles';
+import { basemaps, layerStyles, mapStyle } from '../Map/styles';
 import SiteDetails from '../Site/Details';
 import CasesList from '../Case/List';
 
@@ -154,6 +154,7 @@ const Content = (): JSX.Element => {
                             }}
                             initialBounds={sitesBounds.current}
                             attribution
+                            basemaps={basemaps}
                             help
                             navigation
                             onLoad={onMapLoad}
