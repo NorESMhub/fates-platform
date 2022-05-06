@@ -11,7 +11,7 @@ import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import Typography from '@mui/material/Typography';
 
-import { StateContext } from '../../store';
+import { ConfigContext, DispatchContext } from '../../store';
 import { renderVariableValue } from '../../utils/cases';
 
 interface Props {
@@ -20,7 +20,8 @@ interface Props {
 }
 
 const CaseDelete = ({ caseInfo, handleClose }: Props) => {
-    const { state, dispatch } = React.useContext(StateContext);
+    const { dispatch } = React.useContext(DispatchContext);
+    const { variablesConfig } = React.useContext(ConfigContext);
 
     const [errors, updateErrors] = React.useState<string>('');
 
@@ -29,8 +30,8 @@ const CaseDelete = ({ caseInfo, handleClose }: Props) => {
             .delete(`${API_PATH}/cases/${caseInfo.id}`)
             .then(() => {
                 dispatch({
-                    type: 'updateSelectedSiteCases',
-                    cases: state.selectedSiteCases?.filter((c) => c.id !== caseInfo.id)
+                    type: 'deleteSelectedSiteCase',
+                    case: caseInfo
                 });
                 handleClose();
             })
@@ -57,7 +58,7 @@ const CaseDelete = ({ caseInfo, handleClose }: Props) => {
                 <Typography variant="body1">Compset: {caseInfo.compset}</Typography>
                 <Typography variant="body1">Variables:</Typography>
                 <List dense disablePadding>
-                    {state.variablesConfig.map((variableConfig) => (
+                    {variablesConfig.map((variableConfig) => (
                         <ListItem key={variableConfig.name} disableGutters disablePadding>
                             <ListItemText
                                 sx={{ display: 'flex' }}

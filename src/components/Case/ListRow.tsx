@@ -14,7 +14,7 @@ import TableCell from '@mui/material/TableCell';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 
-import { StateContext } from '../../store';
+import { ConfigContext, DispatchContext, SelectionContext } from '../../store';
 import { renderVariableValue } from '../../utils/cases';
 import Status from './Status';
 
@@ -25,7 +25,10 @@ interface Props {
 }
 
 const CaseListRow = ({ caseInfo, handleEdit, handleDelete }: Props) => {
-    const { state, dispatch } = React.useContext(StateContext);
+    const { dispatch } = React.useContext(DispatchContext);
+    const { variablesConfig } = React.useContext(ConfigContext);
+    const { selectedSite, selectedSiteCases } = React.useContext(SelectionContext);
+
     const [showVariables, updateShowVariables] = React.useState(false);
     const [isDownloading, updateIsDownloading] = React.useState(false);
 
@@ -33,7 +36,7 @@ const CaseListRow = ({ caseInfo, handleEdit, handleDelete }: Props) => {
         let intervalId: number;
 
         if (
-            state.selectedSite &&
+            selectedSite &&
             (!['SUCCESS', 'FAILURE', 'REVOKED'].includes(caseInfo.create_task.status || '') ||
                 (['BUILDING', 'BUILT'].includes(caseInfo.status) &&
                     !['SUCCESS', 'FAILURE', 'REVOKED'].includes(caseInfo.run_task.status || '')))
@@ -48,13 +51,8 @@ const CaseListRow = ({ caseInfo, handleEdit, handleDelete }: Props) => {
                     ) {
                         // Update the case task info
                         dispatch({
-                            type: 'updateSelectedSiteCases',
-                            cases: state.selectedSiteCases?.map((c) => {
-                                if (c.id === caseInfo.id) {
-                                    return data;
-                                }
-                                return c;
-                            })
+                            type: 'updateSelectedSiteCase',
+                            case: data
                         });
                     }
                 });
@@ -67,26 +65,15 @@ const CaseListRow = ({ caseInfo, handleEdit, handleDelete }: Props) => {
                 clearInterval(intervalId);
             }
         };
-    }, [
-        caseInfo.status,
-        caseInfo.create_task.status,
-        caseInfo.run_task.status,
-        state.selectedSite,
-        state.selectedSiteCases
-    ]);
+    }, [caseInfo.status, caseInfo.create_task.status, caseInfo.run_task.status, selectedSite, selectedSiteCases]);
 
     const handleRun = () => {
         axios
             .post<CaseWithTaskInfo>(`${API_PATH}/cases/${caseInfo.id}/`)
             .then(({ data }) => {
                 dispatch({
-                    type: 'updateSelectedSiteCases',
-                    cases: state.selectedSiteCases?.map((c) => {
-                        if (c.id === caseInfo.id) {
-                            return data;
-                        }
-                        return c;
-                    })
+                    type: 'updateSelectedSiteCase',
+                    case: data
                 });
             })
             .catch(console.error);
@@ -193,7 +180,7 @@ const CaseListRow = ({ caseInfo, handleEdit, handleDelete }: Props) => {
                 <DialogTitle>Variables</DialogTitle>
                 <DialogContent>
                     <List dense disablePadding>
-                        {state.variablesConfig.map((variableConfig) => (
+                        {variablesConfig.map((variableConfig) => (
                             <ListItem key={variableConfig.name}>
                                 <ListItemText
                                     sx={{ pl: 0, display: 'flex' }}

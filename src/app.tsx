@@ -6,19 +6,35 @@ import CssBaseline from '@mui/material/CssBaseline';
 import DateFnsAdapter from '@mui/lab/AdapterDateFns';
 import LocalizationProvider from '@mui/lab/LocalizationProvider';
 
-import { StateContext, initialState, reducers } from './store';
+import { DispatchContext, ConfigContext, SelectionContext, initialState, reducers } from './store';
 import { theme } from './theme';
 import Content from './components/Main/Content';
 import Loading from './components/Main/Loading';
 
 const App = (): JSX.Element => {
     const [state, dispatch] = React.useReducer(reducers, initialState);
-    const stateContextValue = React.useMemo(
+
+    const dispatchContextValue = React.useMemo(
         () => ({
-            state,
             dispatch
         }),
-        [state]
+        []
+    );
+    const configContextValue = React.useMemo(
+        () => ({
+            ctsmInfo: state.ctsmInfo,
+            sites: state.sites,
+            sitesBounds: state.sitesBounds,
+            variablesConfig: state.variablesConfig
+        }),
+        [state.ctsmInfo, state.sites, state.sitesBounds, state.variablesConfig]
+    );
+    const selectionContextValue = React.useMemo(
+        () => ({
+            selectedSite: state.selectedSite,
+            selectedSiteCases: state.selectedSiteCases
+        }),
+        [state.selectedSite, state.selectedSiteCases]
     );
 
     React.useEffect(() => {
@@ -47,9 +63,15 @@ const App = (): JSX.Element => {
                 <CssBaseline />
                 <StyledEngineProvider injectFirst>
                     <ThemeProvider theme={theme}>
-                        <StateContext.Provider value={stateContextValue}>
-                            <Suspense fallback={<Loading />}>{state.sites ? <Content /> : <Loading />}</Suspense>
-                        </StateContext.Provider>
+                        <DispatchContext.Provider value={dispatchContextValue}>
+                            <ConfigContext.Provider value={configContextValue}>
+                                <SelectionContext.Provider value={selectionContextValue}>
+                                    <Suspense fallback={<Loading />}>
+                                        {state.sites ? <Content /> : <Loading />}
+                                    </Suspense>
+                                </SelectionContext.Provider>
+                            </ConfigContext.Provider>
+                        </DispatchContext.Provider>
                     </ThemeProvider>
                 </StyledEngineProvider>
             </LocalizationProvider>

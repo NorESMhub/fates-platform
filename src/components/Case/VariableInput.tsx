@@ -5,17 +5,15 @@ import Checkbox from '@mui/material/Checkbox';
 import FormControl from '@mui/material/FormControl';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormHelperText from '@mui/material/FormHelperText';
-import TableCell from '@mui/material/TableCell';
 import TextField from '@mui/material/TextField';
 import DatePicker from '@mui/lab/DatePicker';
 
-import { StateContext } from '../../store';
+import { SelectionContext } from '../../store';
 import { valueExists } from '../../utils/cases';
 import InputHelperText from './InputHelperText';
 
 interface Props {
     variable: CaseVariableConfig;
-    pftIndexCount?: number;
     value?: VariableValue;
     hideLabel?: boolean;
     hideHelperText?: boolean;
@@ -23,22 +21,13 @@ interface Props {
     onChange: (value?: VariableValue) => void;
 }
 
-const VariableInput = ({ variable, pftIndexCount, value, hideLabel, hideHelperText, onErrors, onChange }: Props) => {
-    const { state } = React.useContext(StateContext);
+const VariableInput = ({ variable, value, hideLabel, hideHelperText, onErrors, onChange }: Props) => {
+    const { selectedSite } = React.useContext(SelectionContext);
 
     const [errors, updateErrors] = React.useState<string[]>([]);
     const hasErrors = errors.length > 0;
 
-    const [fatesErrors, updateFATESErrors] = React.useState<boolean[]>([]);
-
-    const [fatesParamValue, updateFATESParamValue] = React.useState<(VariableValue | undefined)[]>(
-        value as VariableValue[]
-    );
-
-    const defaultValue = state.selectedSite?.config?.find((v) => v.name === variable.name)?.value || variable.default;
-    const getFATESParamValue = (): (VariableValue | undefined)[] => {
-        return (fatesParamValue || defaultValue) as (VariableValue | undefined)[];
-    };
+    const defaultValue = selectedSite?.config?.find((v) => v.name === variable.name)?.value || variable.default;
 
     const label = variable.label || variable.name;
 
@@ -105,31 +94,6 @@ const VariableInput = ({ variable, pftIndexCount, value, hideLabel, hideHelperTe
         onChange(changedValue);
     };
 
-    const handleFATESParamChange = (idx: number, changedValue?: string) => {
-        const variableErrors = [...fatesErrors];
-        variableErrors[idx] = false;
-
-        if (changedValue) {
-            if (Number.isNaN(Number(changedValue))) {
-                variableErrors[idx] = true;
-            }
-        }
-
-        const newValue = [...getFATESParamValue()];
-        newValue[idx] = changedValue;
-
-        updateFATESErrors(variableErrors);
-        updateFATESParamValue(newValue);
-
-        const hasFATESErrors = variableErrors.some((e) => e);
-        updateErrors(hasFATESErrors ? ['Only accepts number'] : []);
-        onErrors(hasFATESErrors ? ['Only accepts number'] : []);
-
-        if (!hasFATESErrors) {
-            handleChange(newValue as VariableValue);
-        }
-    };
-
     if (variable.readonly) {
         return (
             <FormControl size="small" margin="normal">
@@ -139,45 +103,9 @@ const VariableInput = ({ variable, pftIndexCount, value, hideLabel, hideHelperTe
                     helperText={helperText}
                     size="small"
                     margin="dense"
-                    InputLabelProps={{ shrink: true }}
-                    InputProps={{
-                        notched: true,
-                        inputProps: {
-                            placeholder: defaultValue?.toString()
-                        }
-                    }}
                     value={defaultValue}
                 />
             </FormControl>
-        );
-    }
-
-    if (variable.category === 'fates_param') {
-        return (
-            <>
-                <TableCell sx={{ borderBottom: 'none' }} align="center" size="small">
-                    {label}
-                    <FormHelperText error={hasErrors}>{helperText}</FormHelperText>
-                </TableCell>
-                {[...Array(pftIndexCount).keys()].map((idx) => (
-                    <TableCell key={idx} sx={{ borderBottom: 'none' }} align="center" size="small">
-                        <TextField
-                            error={fatesErrors[idx]}
-                            size="small"
-                            margin="dense"
-                            variant="standard"
-                            InputProps={{
-                                inputProps: {
-                                    sx: { textAlign: 'center' },
-                                    placeholder: (defaultValue as VariableValue[])[idx].toString()
-                                }
-                            }}
-                            value={getFATESParamValue()[idx]}
-                            onChange={(e) => handleFATESParamChange(idx, e.target.value)}
-                        />
-                    </TableCell>
-                ))}
-            </>
         );
     }
 
@@ -230,12 +158,20 @@ const VariableInput = ({ variable, pftIndexCount, value, hideLabel, hideHelperTe
             );
         }
 
-        const autocompleteValueObject = valueExists(value)
-            ? {
-                  value,
-                  label: choices.find((c) => c.value === value)?.label || value?.toString() || ''
-              }
-            : defaultValue;
+        let autocompleteValueObject;
+        if (valueExists(value)) {
+            autocompleteValueObject = {
+                value,
+                label: choices.find((c) => c.value === value)?.label || value?.toString() || ''
+            };
+        } else if (valueExists(defaultValue)) {
+            autocompleteValueObject = {
+                value: defaultValue,
+                label: choices.find((c) => c.value === defaultValue)?.label || defaultValue?.toString() || ''
+            };
+        } else {
+            autocompleteValueObject = null;
+        }
 
         return (
             <FormControl size="small" margin="normal">
@@ -291,7 +227,7 @@ const VariableInput = ({ variable, pftIndexCount, value, hideLabel, hideHelperTe
                         InputProps={{
                             notched: true,
                             inputProps: {
-                                placeholder: defaultValue?.toString()
+                                placeholder: variable.placeholder
                             }
                         }}
                         value={value || ''}
@@ -317,7 +253,7 @@ const VariableInput = ({ variable, pftIndexCount, value, hideLabel, hideHelperTe
                                     notched: true,
                                     inputProps: {
                                         ...params.inputProps,
-                                        placeholder: defaultValue?.toString()
+                                        placeholder: variable.placeholder
                                     }
                                 }}
                                 helperText={helperText}

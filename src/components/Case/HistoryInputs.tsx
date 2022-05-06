@@ -10,7 +10,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 
-import { StateContext } from '../../store';
+import { ConfigContext } from '../../store';
 import { valueExists } from '../../utils/cases';
 import InfoPopover from '../InfoPopover';
 import InputHelperText from './InputHelperText';
@@ -23,7 +23,7 @@ interface Props {
 }
 
 const HistoryInputs = ({ variables, handleVariableChange, handleVariableErrors }: Props) => {
-    const { state } = React.useContext(StateContext);
+    const { variablesConfig } = React.useContext(ConfigContext);
 
     const [infoPopover, updatedInfoPopover] = React.useState<{
         anchor: HTMLElement;
@@ -35,7 +35,7 @@ const HistoryInputs = ({ variables, handleVariableChange, handleVariableErrors }
 
     const historyFiles: CaseVariableConfig[] = [];
     const historyVariables: CaseVariableConfig[] = [];
-    state.variablesConfig.forEach((config) => {
+    variablesConfig.forEach((config) => {
         if (config.name.startsWith('hist_fincl')) {
             historyFiles.push(config);
         } else if (config.category === 'user_nl_clm_history_file') {
@@ -145,44 +145,46 @@ const HistoryInputs = ({ variables, handleVariableChange, handleVariableErrors }
                                     <InputHelperText errors={errorMessages[variableConfig.name] || []} />
                                 </FormHelperText>
                             </TableCell>
-                            {historyFiles.map((historyField, idx) => {
-                                const values = (variables[variableConfig.name] || []) as Array<
-                                    string | number | boolean | undefined
-                                >;
-                                return (
-                                    <TableCell
-                                        key={historyField.name}
-                                        sx={{ borderBottom: 'none' }}
-                                        align="center"
-                                        size="small"
-                                    >
-                                        <VariableInput
-                                            variable={{
-                                                ...variableConfig,
-                                                allow_multiple: false,
-                                                default: ((variableConfig.default || []) as number[])[idx]
-                                            }}
-                                            value={values[idx]}
-                                            hideLabel
-                                            hideHelperText
-                                            onErrors={(errors: string[]) => {
-                                                updateErrorMessages({
-                                                    ...errorMessages,
-                                                    [variableConfig.name]: errors
-                                                });
-                                                handleVariableErrors(variableConfig.name, errors.length > 0);
-                                            }}
-                                            onChange={(value) => {
-                                                handleHistoryVariableChange(
-                                                    variableConfig,
-                                                    idx,
-                                                    value as string | number | boolean | undefined
-                                                );
-                                            }}
-                                        />
-                                    </TableCell>
-                                );
-                            })}
+                            {historyFiles.map((historyField, idx) => (
+                                <TableCell
+                                    key={historyField.name}
+                                    sx={{ borderBottom: 'none' }}
+                                    align="center"
+                                    size="small"
+                                >
+                                    <VariableInput
+                                        variable={{
+                                            ...variableConfig,
+                                            allow_multiple: false,
+                                            placeholder: ((variableConfig.default || []) as number[])[idx].toString(),
+                                            default: ((variableConfig.default || []) as number[])[idx]
+                                        }}
+                                        value={
+                                            (
+                                                (variables[variableConfig.name] || []) as Array<
+                                                    string | number | boolean | undefined
+                                                >
+                                            )[idx]
+                                        }
+                                        hideLabel
+                                        hideHelperText
+                                        onErrors={(errors: string[]) => {
+                                            updateErrorMessages({
+                                                ...errorMessages,
+                                                [variableConfig.name]: errors
+                                            });
+                                            handleVariableErrors(variableConfig.name, errors.length > 0);
+                                        }}
+                                        onChange={(value) => {
+                                            handleHistoryVariableChange(
+                                                variableConfig,
+                                                idx,
+                                                value as string | number | boolean | undefined
+                                            );
+                                        }}
+                                    />
+                                </TableCell>
+                            ))}
                         </TableRow>
                     ))}
                 </TableBody>

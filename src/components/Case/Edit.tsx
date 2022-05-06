@@ -12,8 +12,9 @@ import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import Typography from '@mui/material/Typography';
 
-import { StateContext } from '../../store';
+import { ConfigContext, DispatchContext, SelectionContext } from '../../store';
 import { valueExists } from '../../utils/cases';
+import { areFlatArraysEqual } from '../../utils/lodash';
 import FATESParamsInputs from './FATESParamsInputs';
 import HistoryInputs from './HistoryInputs';
 import VariableInput from './VariableInput';
@@ -32,7 +33,9 @@ interface Props {
 const CaseEdit = ({ initialVariables, handleClose }: Props) => {
     const classes = useStyles();
 
-    const { state, dispatch } = React.useContext(StateContext);
+    const { dispatch } = React.useContext(DispatchContext);
+    const { variablesConfig } = React.useContext(ConfigContext);
+    const { selectedSite } = React.useContext(SelectionContext);
 
     const [activeTab, updateActiveTab] = React.useState<VariableCategory>('ctsm_xml');
 
@@ -41,9 +44,7 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
 
     const [serverErrors, updateServerErrors] = React.useState<HTTPError>('');
 
-    const pftIndexCount = state.selectedSite?.config?.find((v) => v.name === 'pft_index_count')?.value as
-        | number
-        | undefined;
+    const pftIndexCount = selectedSite?.config?.find((v) => v.name === 'pft_index_count')?.value as number | undefined;
 
     React.useEffect(() => {
         if (!variables.included_pft_indices) {
@@ -64,53 +65,55 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
     };
 
     const handleSubmit = () => {
-        const preparedVariables: CaseVariable[] = state.variablesConfig
+        const preparedVariables: CaseVariable[] = variablesConfig
             .map((variableConfig) => {
                 const defaultValue =
-                    state.selectedSite?.config?.find((variable) => variable.name === variableConfig.name)?.value ||
+                    selectedSite?.config?.find((variable) => variable.name === variableConfig.name)?.value ||
                     variableConfig.default;
                 let value = valueExists(variables[variableConfig.name]) ? variables[variableConfig.name] : defaultValue;
+
                 if (variableConfig.category === 'fates_param' && value) {
                     const fatesParamDefaultValue = defaultValue as number[];
                     value = (value as Array<string | number>).map((v, idx) =>
                         parseFloat((v || (fatesParamDefaultValue[idx] as number)).toString(10))
                     );
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-ignore
+                    if (areFlatArraysEqual(value, fatesParamDefaultValue)) {
+                        value = undefined;
+                    }
                 }
+
+                if (
+                    variableConfig.category === 'user_nl_clm_history_file' &&
+                    !variableConfig.name.startsWith('hist_finc')
+                ) {
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-ignore
+                    if (areFlatArraysEqual(value, defaultValue)) {
+                        value = undefined;
+                    }
+                }
+
                 return {
                     name: variableConfig.name,
                     value
                 } as CaseVariable;
             })
             .filter((variable) => valueExists(variable.value));
+
         axios
             .post<CaseWithTaskInfo, AxiosResponse<CaseWithTaskInfo>, CaseEditPayload>(`${API_PATH}/sites/`, {
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                site_name: state.selectedSite!.name,
+                site_name: selectedSite!.name,
                 variables: preparedVariables,
                 driver: 'mct'
             })
             .then(({ data }) => {
-                const cases = state.selectedSiteCases;
-                if (cases) {
-                    const editedCaseIdx = cases.findIndex((c) => c.id === data.id);
-                    if (editedCaseIdx !== -1) {
-                        dispatch({
-                            type: 'updateSelectedSiteCases',
-                            cases: cases
-                                .slice(0, editedCaseIdx)
-                                .concat(data)
-                                .concat(cases.slice(editedCaseIdx + 1))
-                        });
-                    } else {
-                        dispatch({
-                            type: 'updateSelectedSiteCases',
-                            cases: [...cases, data]
-                        });
-                    }
-                } else {
-                    // This should never happen
-                    console.error('No cases found');
-                }
+                dispatch({
+                    type: 'updateSelectedSiteCase',
+                    case: data
+                });
                 handleClose();
             })
             .catch(({ response: { data } }) => {
@@ -145,7 +148,7 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
                     <Tab label="FATES" value="fates" />
                 </Tabs>
                 <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1, justifyContent: 'space-evenly' }}>
-                    {state.variablesConfig
+                    {variablesConfig
                         .filter(
                             (variableConfig) =>
                                 variableConfig.category === activeTab &&
