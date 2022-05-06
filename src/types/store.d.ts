@@ -24,7 +24,17 @@ interface UpdateSelectedSite {
 
 interface UpdateSelectedSiteCases {
     type: 'updateSelectedSiteCases';
-    cases?: CaseWithTaskInfo[];
+    cases: CaseWithTaskInfo[];
+}
+
+interface UpdateSelectedSiteCase {
+    type: 'updateSelectedSiteCase';
+    case: CaseWithTaskInfo;
+}
+
+interface DeleteSelectedSiteCase {
+    type: 'deleteSelectedSiteCase';
+    case: CaseWithTaskInfo;
 }
 
 interface UpdateVariablesConfig {
@@ -32,9 +42,27 @@ interface UpdateVariablesConfig {
     vars: CaseVariableConfig[];
 }
 
-type Action = UpdateCTSMInfo | UpdateSites | UpdateSelectedSite | UpdateSelectedSiteCases | UpdateVariablesConfig;
+type Action =
+    | UpdateCTSMInfo
+    | UpdateSites
+    | UpdateSelectedSite
+    | UpdateSelectedSiteCases
+    | UpdateSelectedSiteCase
+    | DeleteSelectedSiteCase
+    | UpdateVariablesConfig;
 
-interface StoreContext {
-    state: State;
+interface DispatchContext {
     dispatch: React.Dispatch<Action>;
+}
+
+interface ConfigContext {
+    ctsmInfo?: CTSMInfo;
+    sites?: Sites;
+    sitesBounds: maplibregl.LngLatBoundsLike;
+    variablesConfig: CaseVariableConfig[];
+}
+
+interface SelectionContext {
+    selectedSite?: SiteProps;
+    selectedSiteCases?: CaseWithTaskInfo[];
 }

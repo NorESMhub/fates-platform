@@ -1,5 +1,6 @@
 import React from 'react';
 import maplibre from 'maplibre-gl';
+import BasemapsControl, { MapLibreBasemapsControlOptions } from 'maplibre-gl-basemaps';
 import Box from '@mui/material/Box';
 import Icon from '@mui/material/Icon';
 
@@ -10,12 +11,13 @@ interface Props {
     mapOptions: Partial<maplibregl.MapOptions>;
     initialBounds: maplibregl.LngLatBoundsLike;
     attribution?: boolean;
+    basemaps?: MapLibreBasemapsControlOptions;
     help?: boolean;
     navigation?: boolean;
     onLoad: (map: maplibregl.Map) => void;
 }
 
-const Map = ({ mapOptions, initialBounds, attribution, help, navigation, onLoad }: Props): JSX.Element => {
+const Map = ({ mapOptions, initialBounds, attribution, basemaps, help, navigation, onLoad }: Props): JSX.Element => {
     const mapContainerRef = React.useRef<HTMLDivElement>(null);
     const mapRef = React.useRef<maplibregl.Map>();
 
@@ -46,6 +48,10 @@ const Map = ({ mapOptions, initialBounds, attribution, help, navigation, onLoad 
                 if (resetBoundsButtonRef.current) {
                     map.addControl(new MapControl(resetBoundsButtonRef.current));
                 }
+            }
+
+            if (basemaps) {
+                map.addControl(new BasemapsControl(basemaps), 'bottom-left');
             }
 
             if (help && helpButtonRef.current) {

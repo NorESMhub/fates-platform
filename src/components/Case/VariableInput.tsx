@@ -5,17 +5,15 @@ import Checkbox from '@mui/material/Checkbox';
 import FormControl from '@mui/material/FormControl';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormHelperText from '@mui/material/FormHelperText';
-import TableCell from '@mui/material/TableCell';
 import TextField from '@mui/material/TextField';
 import DatePicker from '@mui/lab/DatePicker';
 
-import { StateContext } from '../../store';
+import { SelectionContext } from '../../store';
 import { valueExists } from '../../utils/cases';
 import InputHelperText from './InputHelperText';
 
 interface Props {
     variable: CaseVariableConfig;
-    pftIndexCount?: number;
     value?: VariableValue;
     hideLabel?: boolean;
     hideHelperText?: boolean;
@@ -23,22 +21,13 @@ interface Props {
     onChange: (value?: VariableValue) => void;
 }
 
-const VariableInput = ({ variable, pftIndexCount, value, hideLabel, hideHelperText, onErrors, onChange }: Props) => {
-    const { state } = React.useContext(StateContext);
+const VariableInput = ({ variable, value, hideLabel, hideHelperText, onErrors, onChange }: Props) => {
+    const { selectedSite } = React.useContext(SelectionContext);
 
     const [errors, updateErrors] = React.useState<string[]>([]);
     const hasErrors = errors.length > 0;
 
-    const [fatesErrors, updateFATESErrors] = React.useState<boolean[]>([]);
-
-    const [fatesParamValue, updateFATESParamValue] = React.useState<(VariableValue | undefined)[]>(
-        value as VariableValue[]
-    );
-
-    const defaultValue = state.selectedSite?.config?.find((v) => v.name === variable.name)?.value || variable.default;
-    const getFATESParamValue = (): (VariableValue | undefined)[] => {
-        return (fatesParamValue || defaultValue) as (VariableValue | undefined)[];
-    };
+    const defaultValue = selectedSite?.config?.find((v) => v.name === variable.name)?.value || variable.default;
 
     const label = variable.label || variable.name;
 
@@ -58,11 +47,11 @@ const VariableInput = ({ variable, pftIndexCount, value, hideLabel, hideHelperTe
             const choices = [...(validation?.choices || [])];
             arrayValue.forEach((v) => {
                 if (allow_custom) {
-                    choices.push(v as string | number);
+                    choices.push({ value: v as VariableValue, label: v.toString() });
                 }
 
-                if (validation?.choices && choices.findIndex((c) => c === v) === -1) {
-                    variableErrors.push(`${label} must be one of ${choices.join(', ')}`);
+                if (validation?.choices && choices.findIndex((c) => c.value === v) === -1) {
+                    variableErrors.push(`${label} must be one of ${choices.map((c) => c.label).join(', ')}`);
                 } else if (validation?.pattern && !new RegExp(validation.pattern).test(v.toString())) {
                     if (validation?.pattern_error) {
                         variableErrors.push(validation.pattern_error);
@@ -105,31 +94,6 @@ const VariableInput = ({ variable, pftIndexCount, value, hideLabel, hideHelperTe
         onChange(changedValue);
     };
 
-    const handleFATESParamChange = (idx: number, changedValue?: string) => {
-        const variableErrors = [...fatesErrors];
-        variableErrors[idx] = false;
-
-        if (changedValue) {
-            if (Number.isNaN(Number(changedValue))) {
-                variableErrors[idx] = true;
-            }
-        }
-
-        const newValue = [...getFATESParamValue()];
-        newValue[idx] = changedValue;
-
-        updateFATESErrors(variableErrors);
-        updateFATESParamValue(newValue);
-
-        const hasFATESErrors = variableErrors.some((e) => e);
-        updateErrors(hasFATESErrors ? ['Only accepts number'] : []);
-        onErrors(hasFATESErrors ? ['Only accepts number'] : []);
-
-        if (!hasFATESErrors) {
-            handleChange(newValue as VariableValue);
-        }
-    };
-
     if (variable.readonly) {
         return (
             <FormControl size="small" margin="normal">
@@ -139,75 +103,83 @@ const VariableInput = ({ variable, pftIndexCount, value, hideLabel, hideHelperTe
                     helperText={helperText}
                     size="small"
                     margin="dense"
-                    InputLabelProps={{ shrink: true }}
-                    InputProps={{
-                        notched: true,
-                        inputProps: {
-                            placeholder: defaultValue?.toString()
-                        }
-                    }}
                     value={defaultValue}
                 />
             </FormControl>
         );
     }
 
-    if (variable.category === 'fates_param') {
-        return (
-            <>
-                <TableCell sx={{ borderBottom: 'none' }} align="center" size="small">
-                    {label}
-                    <FormHelperText error={hasErrors}>{helperText}</FormHelperText>
-                </TableCell>
-                {[...Array(pftIndexCount).keys()].map((idx) => (
-                    <TableCell key={idx} sx={{ borderBottom: 'none' }} align="center" size="small">
-                        <TextField
-                            error={fatesErrors[idx]}
-                            size="small"
-                            margin="dense"
-                            variant="standard"
-                            InputProps={{
-                                inputProps: {
-                                    sx: { textAlign: 'center' },
-                                    placeholder: (defaultValue as VariableValue[])[idx].toString()
-                                }
-                            }}
-                            value={getFATESParamValue()[idx]}
-                            onChange={(e) => handleFATESParamChange(idx, e.target.value)}
-                        />
-                    </TableCell>
-                ))}
-            </>
-        );
-    }
-
     if (variable.validation?.choices) {
-        let selectValue;
+        const { choices } = variable.validation;
+
         if (variable.allow_multiple) {
-            if (value) {
-                if (Array.isArray(value)) {
-                    selectValue = value;
-                } else {
-                    selectValue = [value];
-                }
-            } else {
-                selectValue = defaultValue || [];
-            }
-        } else if (value) {
-            selectValue = value;
+            const autocompleteValues: VariableValue[] = [];
+            const autocompleteValuesObject: VariableChoice[] = [];
+            ((valueExists(value) ? value : defaultValue || []) as VariableValue[]).forEach((v) => {
+                autocompleteValues.push(v.toString());
+                autocompleteValuesObject.push({
+                    value: v,
+                    label: choices.find((c) => c.value === v)?.label || v.toString()
+                });
+            });
+
+            return (
+                <FormControl size="small" margin="normal">
+                    <Autocomplete
+                        sx={{ minWidth: 225 }}
+                        multiple
+                        freeSolo={variable.allow_custom}
+                        options={choices}
+                        disableCloseOnSelect={variable.allow_multiple}
+                        filterOptions={() => choices.filter((c) => !autocompleteValues.includes(c.value))}
+                        filterSelectedOptions
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                error={hasErrors}
+                                size="small"
+                                margin="dense"
+                                label={hideLabel ? null : label}
+                                InputLabelProps={{ ...params.InputLabelProps, shrink: true }}
+                                InputProps={{
+                                    ...params.InputProps,
+                                    notched: true,
+                                    placeholder: variable.placeholder
+                                }}
+                            />
+                        )}
+                        value={autocompleteValuesObject}
+                        onChange={(_event, newValue) => {
+                            handleChange(newValue.map((v) => (typeof v === 'string' ? v : v.value)) as VariableValue);
+                        }}
+                    />
+                    <FormHelperText>{helperText}</FormHelperText>
+                </FormControl>
+            );
+        }
+
+        let autocompleteValueObject;
+        if (valueExists(value)) {
+            autocompleteValueObject = {
+                value,
+                label: choices.find((c) => c.value === value)?.label || value?.toString() || ''
+            };
+        } else if (valueExists(defaultValue)) {
+            autocompleteValueObject = {
+                value: defaultValue,
+                label: choices.find((c) => c.value === defaultValue)?.label || defaultValue?.toString() || ''
+            };
         } else {
-            selectValue = defaultValue;
+            autocompleteValueObject = null;
         }
 
         return (
             <FormControl size="small" margin="normal">
                 <Autocomplete
                     sx={{ minWidth: 225 }}
-                    multiple={variable.allow_multiple}
                     freeSolo={variable.allow_custom}
-                    options={variable.validation.choices}
-                    getOptionLabel={(option) => option?.toString() || ''}
-                    disableCloseOnSelect={variable.allow_multiple}
+                    options={choices}
+                    filterOptions={() => choices.filter((c) => c.value !== value)}
                     filterSelectedOptions
                     renderInput={(params) => (
                         <TextField
@@ -216,11 +188,22 @@ const VariableInput = ({ variable, pftIndexCount, value, hideLabel, hideHelperTe
                             size="small"
                             margin="dense"
                             label={hideLabel ? null : label}
+                            InputLabelProps={{ ...params.InputLabelProps, shrink: true }}
+                            InputProps={{
+                                ...params.InputProps,
+                                notched: true,
+                                placeholder: variable.placeholder
+                            }}
                         />
                     )}
-                    value={selectValue}
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-ignore
+                    isOptionEqualToValue={(option, v) => option.value === v.value}
+                    value={autocompleteValueObject}
                     onChange={(_event, newValue) => {
-                        handleChange((newValue || undefined) as VariableValue);
+                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                        // @ts-ignore
+                        handleChange(newValue?.value);
                     }}
                 />
                 <FormHelperText>{helperText}</FormHelperText>
@@ -244,7 +227,7 @@ const VariableInput = ({ variable, pftIndexCount, value, hideLabel, hideHelperTe
                         InputProps={{
                             notched: true,
                             inputProps: {
-                                placeholder: defaultValue?.toString()
+                                placeholder: variable.placeholder
                             }
                         }}
                         value={value || ''}
@@ -270,7 +253,7 @@ const VariableInput = ({ variable, pftIndexCount, value, hideLabel, hideHelperTe
                                     notched: true,
                                     inputProps: {
                                         ...params.inputProps,
-                                        placeholder: defaultValue?.toString()
+                                        placeholder: variable.placeholder
                                     }
                                 }}
                                 helperText={helperText}

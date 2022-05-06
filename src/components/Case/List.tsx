@@ -10,7 +10,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 
-import { StateContext } from '../../store';
+import { DispatchContext, SelectionContext } from '../../store';
 import InfoPopover from '../InfoPopover';
 import CaseDelete from './Delete';
 import CaseEdit from './Edit';
@@ -21,7 +21,8 @@ interface Props {
 }
 
 const SiteList = ({ site }: Props) => {
-    const { state, dispatch } = React.useContext(StateContext);
+    const { dispatch } = React.useContext(DispatchContext);
+    const { selectedSiteCases } = React.useContext(SelectionContext);
 
     const [editCase, updatedEditCase] = React.useState<CaseWithTaskInfo | null>(null);
     const [deleteCase, updatedDeleteCase] = React.useState<CaseWithTaskInfo | null>(null);
@@ -98,7 +99,7 @@ const SiteList = ({ site }: Props) => {
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {state.selectedSiteCases?.map((caseInfo) => (
+                    {selectedSiteCases?.map((caseInfo) => (
                         <CaseListRow
                             key={caseInfo.create_task_id}
                             caseInfo={caseInfo}

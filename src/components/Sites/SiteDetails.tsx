@@ -5,15 +5,15 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 
-import { StateContext } from '../../store';
+import { DispatchContext } from '../../store';
 import CaseEdit from '../Case/Edit';
 
 interface Props {
     site: SiteProps;
 }
 
-const Details = ({ site }: Props) => {
-    const { dispatch } = React.useContext(StateContext);
+const SiteDetails = ({ site }: Props) => {
+    const { dispatch } = React.useContext(DispatchContext);
     const [editCase, updatedEditCase] = React.useState(false);
 
     return (
@@ -71,4 +71,4 @@ const Details = ({ site }: Props) => {
     );
 };
 
-export default Details;
+export default SiteDetails;
