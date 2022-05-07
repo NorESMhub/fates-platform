@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { ConfigContext, DispatchContext, SelectionContext } from '../../store';
+import { StoreContext } from '../../store';
 import Map from '../Map';
 import { basemaps, layerStyles, mapStyle } from '../Map/styles';
 
@@ -15,13 +15,11 @@ interface Props {
 }
 
 const SitesMap = ({ onMapReady }: Props) => {
-    const { dispatch } = React.useContext(DispatchContext);
-    const { sitesBounds, sites } = React.useContext(ConfigContext);
-    const { selectedSite } = React.useContext(SelectionContext);
+    const [state, dispatch] = React.useContext(StoreContext);
 
     const refs = React.useRef<Refs>({
         map: undefined,
-        bounds: sitesBounds,
+        bounds: state.sitesBounds,
         selectedSite: undefined
     });
 
@@ -31,17 +29,17 @@ const SitesMap = ({ onMapReady }: Props) => {
             if (refs.current.selectedSite) {
                 map.setFeatureState({ source: 'sites', id: refs.current.selectedSite.name }, { selected: false });
             }
-            if (selectedSite) {
-                map.setFeatureState({ source: 'sites', id: selectedSite.name }, { selected: true });
+            if (state.selectedSite) {
+                map.setFeatureState({ source: 'sites', id: state.selectedSite.name }, { selected: true });
             }
         }
-        refs.current.selectedSite = selectedSite;
-    }, [selectedSite]);
+        refs.current.selectedSite = state.selectedSite;
+    }, [state.selectedSite]);
 
     const onMapLoad = (map: maplibregl.Map) => {
         map.addSource('sites', {
             type: 'geojson',
-            data: sites,
+            data: state.sites,
             promoteId: 'name'
         });
 

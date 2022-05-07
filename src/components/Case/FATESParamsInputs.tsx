@@ -10,7 +10,7 @@ import TableRow from '@mui/material/TableRow';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 
-import { ConfigContext, SelectionContext } from '../../store';
+import { StoreContext } from '../../store';
 import { valueExists } from '../../utils/cases';
 import InputHelperText from './InputHelperText';
 
@@ -22,8 +22,7 @@ interface Props {
 }
 
 const FATESParamsInputs = ({ pftIndexCount, variables, handleVariableChange, handleVariableErrors }: Props) => {
-    const { variablesConfig } = React.useContext(ConfigContext);
-    const { selectedSite } = React.useContext(SelectionContext);
+    const [state] = React.useContext(StoreContext);
 
     const [variablesErrors, updateVariablesErrors] = React.useState<{ [variable: string]: string[] }>({});
     const [variablesIndexErrors, updateVariablesIndexErrors] = React.useState<{ [variable: string]: boolean[] }>({});
@@ -98,14 +97,15 @@ const FATESParamsInputs = ({ pftIndexCount, variables, handleVariableChange, han
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {variablesConfig
+                    {state.variablesConfig
                         .filter(({ category, hidden }) => category === 'fates_param' && !hidden)
                         .map((variableConfig) => {
                             const variableErrors = variablesErrors[variableConfig.name] || [];
                             const hasErrors = variableErrors.length > 0;
 
-                            const defaultValue = (selectedSite?.config?.find((v) => v.name === variableConfig.name)
-                                ?.value ||
+                            const defaultValue = (state.selectedSite?.config?.find(
+                                (v) => v.name === variableConfig.name
+                            )?.value ||
                                 variableConfig.default ||
                                 []) as (VariableValue | undefined)[];
                             const value = values[variableConfig.name] || [];

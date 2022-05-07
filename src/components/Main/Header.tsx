@@ -12,11 +12,11 @@ import ListItem from '@mui/material/ListItem';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 
-import { ConfigContext } from '../../store';
+import { StoreContext } from '../../store';
 import { HEADER_HEIGHT } from '../../theme';
 
 const Header = () => {
-    const { ctsmInfo } = React.useContext(ConfigContext);
+    const [state] = React.useContext(StoreContext);
 
     const [showInfo, updateShowInfo] = React.useState(false);
 
@@ -77,11 +77,11 @@ const Header = () => {
                     <List>
                         <ListItem>
                             Repo:&nbsp;
-                            <Link href={ctsmInfo?.model} target="_blank">
-                                {ctsmInfo?.model}
+                            <Link href={state.ctsmInfo?.model} target="_blank">
+                                {state.ctsmInfo?.model}
                             </Link>
                         </ListItem>
-                        <ListItem>Version: {ctsmInfo?.version}</ListItem>
+                        <ListItem>Version: {state.ctsmInfo?.version}</ListItem>
                     </List>
                 </DialogContent>
             </Dialog>

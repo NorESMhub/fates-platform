@@ -5,7 +5,7 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 
-import { DispatchContext } from '../../store';
+import { StoreContext } from '../../store';
 import CaseEdit from '../Case/Edit';
 
 interface Props {
@@ -13,7 +13,7 @@ interface Props {
 }
 
 const SiteDetails = ({ site }: Props) => {
-    const { dispatch } = React.useContext(DispatchContext);
+    const [, dispatch] = React.useContext(StoreContext);
     const [editCase, updatedEditCase] = React.useState(false);
 
     return (

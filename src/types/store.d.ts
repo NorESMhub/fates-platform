@@ -5,6 +5,7 @@ interface State {
     selectedSite?: SiteProps;
     selectedSiteCases?: CaseWithTaskInfo[];
     variablesConfig: CaseVariableConfig[];
+    isEditingCase: boolean;
 }
 
 interface UpdateCTSMInfo {
@@ -42,6 +43,11 @@ interface UpdateVariablesConfig {
     vars: CaseVariableConfig[];
 }
 
+interface UpdateCaseEditStatus {
+    type: 'updateCaseEditStatus';
+    isEditingCase: boolean;
+}
+
 type Action =
     | UpdateCTSMInfo
     | UpdateSites
@@ -49,20 +55,5 @@ type Action =
     | UpdateSelectedSiteCases
     | UpdateSelectedSiteCase
     | DeleteSelectedSiteCase
-    | UpdateVariablesConfig;
-
-interface DispatchContext {
-    dispatch: React.Dispatch<Action>;
-}
-
-interface ConfigContext {
-    ctsmInfo?: CTSMInfo;
-    sites?: Sites;
-    sitesBounds: maplibregl.LngLatBoundsLike;
-    variablesConfig: CaseVariableConfig[];
-}
-
-interface SelectionContext {
-    selectedSite?: SiteProps;
-    selectedSiteCases?: CaseWithTaskInfo[];
-}
+    | UpdateVariablesConfig
+    | UpdateCaseEditStatus;

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Dispatch, ReducerAction, ReducerState } from 'react';
 import maplibre from 'maplibre-gl';
 
 import { getSitesBounds } from './utils/sites';
@@ -9,21 +9,17 @@ export const initialState: State = {
     sitesBounds: new maplibre.LngLatBounds([-180, -90], [180, 90]),
     selectedSite: undefined,
     selectedSiteCases: undefined,
-    variablesConfig: []
+    variablesConfig: [],
+    isEditingCase: false
 };
 
-// eslint-disable-next-line @typescript-eslint/no-empty-function
-export const DispatchContext = React.createContext<DispatchContext>({ dispatch: () => {} });
-export const ConfigContext = React.createContext<ConfigContext>({
-    ctsmInfo: undefined,
-    sites: undefined,
-    sitesBounds: [-180, -90, 180, 90],
-    variablesConfig: []
-});
-export const SelectionContext = React.createContext<SelectionContext>({
-    selectedSite: undefined,
-    selectedSiteCases: undefined
-});
+export const StoreContext = React.createContext<
+    [ReducerState<typeof reducers>, Dispatch<ReducerAction<typeof reducers>>]
+>([
+    initialState,
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    () => {}
+]);
 
 export const reducers = (state: State, action: Action): State => {
     switch (action.type) {
@@ -94,6 +90,12 @@ export const reducers = (state: State, action: Action): State => {
             return {
                 ...state,
                 variablesConfig: action.vars
+            };
+        }
+        case 'updateCaseEditStatus': {
+            return {
+                ...state,
+                isEditingCase: action.isEditingCase
             };
         }
     }

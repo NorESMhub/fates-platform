@@ -3,15 +3,14 @@ import Alert from '@mui/material/Alert';
 import Chip from '@mui/material/Chip';
 import Typography from '@mui/material/Typography';
 
-import { ConfigContext, DispatchContext } from '../../store';
+import { StoreContext } from '../../store';
 
 interface Props {
     map?: maplibregl.Map;
 }
 
 const SitesList = ({ map }: Props) => {
-    const { dispatch } = React.useContext(DispatchContext);
-    const { sites } = React.useContext(ConfigContext);
+    const [state, dispatch] = React.useContext(StoreContext);
 
     const hoveredSiteRefs = React.useRef<string>();
 
@@ -45,8 +44,8 @@ const SitesList = ({ map }: Props) => {
             <Alert sx={{ m: 1 }} severity="info">
                 Start by selecting a site from the list below or on the map.
             </Alert>
-            {sites &&
-                sites.features.map(({ properties }) => (
+            {state.sites &&
+                state.sites.features.map(({ properties }) => (
                     <Chip
                         key={properties.name}
                         sx={{ m: 1 }}

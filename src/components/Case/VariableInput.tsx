@@ -8,7 +8,7 @@ import FormHelperText from '@mui/material/FormHelperText';
 import TextField from '@mui/material/TextField';
 import DatePicker from '@mui/lab/DatePicker';
 
-import { SelectionContext } from '../../store';
+import { StoreContext } from '../../store';
 import { valueExists } from '../../utils/cases';
 import InputHelperText from './InputHelperText';
 
@@ -22,12 +22,12 @@ interface Props {
 }
 
 const VariableInput = ({ variable, value, hideLabel, hideHelperText, onErrors, onChange }: Props) => {
-    const { selectedSite } = React.useContext(SelectionContext);
+    const [state] = React.useContext(StoreContext);
 
     const [errors, updateErrors] = React.useState<string[]>([]);
     const hasErrors = errors.length > 0;
 
-    const defaultValue = selectedSite?.config?.find((v) => v.name === variable.name)?.value || variable.default;
+    const defaultValue = state.selectedSite?.config?.find((v) => v.name === variable.name)?.value || variable.default;
 
     const label = variable.label || variable.name;
 
@@ -158,15 +158,15 @@ const VariableInput = ({ variable, value, hideLabel, hideHelperText, onErrors, o
             );
         }
 
-        let autocompleteValueObject;
+        let autocompleteValueObject: VariableChoice | null;
         if (valueExists(value)) {
             autocompleteValueObject = {
-                value,
+                value: value as VariableValue,
                 label: choices.find((c) => c.value === value)?.label || value?.toString() || ''
             };
         } else if (valueExists(defaultValue)) {
             autocompleteValueObject = {
-                value: defaultValue,
+                value: defaultValue as VariableValue,
                 label: choices.find((c) => c.value === defaultValue)?.label || defaultValue?.toString() || ''
             };
         } else {

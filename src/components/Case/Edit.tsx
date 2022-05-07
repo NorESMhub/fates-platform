@@ -12,7 +12,7 @@ import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import Typography from '@mui/material/Typography';
 
-import { ConfigContext, DispatchContext, SelectionContext } from '../../store';
+import { StoreContext } from '../../store';
 import { valueExists } from '../../utils/cases';
 import { areFlatArraysEqual } from '../../utils/lodash';
 import FATESParamsInputs from './FATESParamsInputs';
@@ -33,9 +33,14 @@ interface Props {
 const CaseEdit = ({ initialVariables, handleClose }: Props) => {
     const classes = useStyles();
 
-    const { dispatch } = React.useContext(DispatchContext);
-    const { variablesConfig } = React.useContext(ConfigContext);
-    const { selectedSite } = React.useContext(SelectionContext);
+    const [state, dispatch] = React.useContext(StoreContext);
+
+    React.useEffect(() => {
+        dispatch({ type: 'updateCaseEditStatus', isEditingCase: true });
+        return () => {
+            dispatch({ type: 'updateCaseEditStatus', isEditingCase: false });
+        };
+    }, []);
 
     const [activeTab, updateActiveTab] = React.useState<VariableCategory>('ctsm_xml');
 
@@ -44,16 +49,16 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
 
     const [serverErrors, updateServerErrors] = React.useState<HTTPError>('');
 
-    const pftIndexCount = selectedSite?.config?.find((v) => v.name === 'pft_index_count')?.value as number | undefined;
+    const pftIndexCount = state.selectedSite?.config?.find((v) => v.name === 'pft_index_count')?.value as
+        | number
+        | undefined;
 
     React.useEffect(() => {
-        if (!variables.included_pft_indices) {
+        if (!initialVariables.included_pft_indices) {
             updateVariables({
-                ...variables,
+                ...initialVariables,
                 included_pft_indices: [...Array(pftIndexCount).keys()].map((i) => (i + 1).toString(10))
             });
-        } else {
-            updateVariables(initialVariables);
         }
     }, [initialVariables]);
 
@@ -65,10 +70,10 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
     };
 
     const handleSubmit = () => {
-        const preparedVariables: CaseVariable[] = variablesConfig
+        const preparedVariables: CaseVariable[] = state.variablesConfig
             .map((variableConfig) => {
                 const defaultValue =
-                    selectedSite?.config?.find((variable) => variable.name === variableConfig.name)?.value ||
+                    state.selectedSite?.config?.find((variable) => variable.name === variableConfig.name)?.value ||
                     variableConfig.default;
                 let value = valueExists(variables[variableConfig.name]) ? variables[variableConfig.name] : defaultValue;
 
@@ -105,7 +110,7 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
         axios
             .post<CaseWithTaskInfo, AxiosResponse<CaseWithTaskInfo>, CaseEditPayload>(`${API_PATH}/sites/`, {
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                site_name: selectedSite!.name,
+                site_name: state.selectedSite!.name,
                 variables: preparedVariables,
                 driver: 'mct'
             })
@@ -148,7 +153,7 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
                     <Tab label="FATES" value="fates" />
                 </Tabs>
                 <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1, justifyContent: 'space-evenly' }}>
-                    {variablesConfig
+                    {state.variablesConfig
                         .filter(
                             (variableConfig) =>
                                 variableConfig.category === activeTab &&

@@ -14,7 +14,7 @@ import TableCell from '@mui/material/TableCell';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 
-import { ConfigContext, DispatchContext, SelectionContext } from '../../store';
+import { StoreContext } from '../../store';
 import { renderVariableValue } from '../../utils/cases';
 import Status from './Status';
 
@@ -25,9 +25,7 @@ interface Props {
 }
 
 const CaseListRow = ({ caseInfo, handleEdit, handleDelete }: Props) => {
-    const { dispatch } = React.useContext(DispatchContext);
-    const { variablesConfig } = React.useContext(ConfigContext);
-    const { selectedSite, selectedSiteCases } = React.useContext(SelectionContext);
+    const [state, dispatch] = React.useContext(StoreContext);
 
     const [showVariables, updateShowVariables] = React.useState(false);
     const [isDownloading, updateIsDownloading] = React.useState(false);
@@ -36,7 +34,7 @@ const CaseListRow = ({ caseInfo, handleEdit, handleDelete }: Props) => {
         let intervalId: number;
 
         if (
-            selectedSite &&
+            state.selectedSite &&
             (!['SUCCESS', 'FAILURE', 'REVOKED'].includes(caseInfo.create_task.status || '') ||
                 (['BUILDING', 'BUILT'].includes(caseInfo.status) &&
                     !['SUCCESS', 'FAILURE', 'REVOKED'].includes(caseInfo.run_task.status || '')))
@@ -65,7 +63,13 @@ const CaseListRow = ({ caseInfo, handleEdit, handleDelete }: Props) => {
                 clearInterval(intervalId);
             }
         };
-    }, [caseInfo.status, caseInfo.create_task.status, caseInfo.run_task.status, selectedSite, selectedSiteCases]);
+    }, [
+        caseInfo.status,
+        caseInfo.create_task.status,
+        caseInfo.run_task.status,
+        state.selectedSite,
+        state.selectedSiteCases
+    ]);
 
     const handleRun = () => {
         axios
@@ -180,7 +184,7 @@ const CaseListRow = ({ caseInfo, handleEdit, handleDelete }: Props) => {
                 <DialogTitle>Variables</DialogTitle>
                 <DialogContent>
                     <List dense disablePadding>
-                        {variablesConfig.map((variableConfig) => (
+                        {state.variablesConfig.map((variableConfig) => (
                             <ListItem key={variableConfig.name}>
                                 <ListItemText
                                     sx={{ pl: 0, display: 'flex' }}

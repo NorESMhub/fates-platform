@@ -10,7 +10,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 
-import { ConfigContext } from '../../store';
+import { StoreContext } from '../../store';
 import { valueExists } from '../../utils/cases';
 import InfoPopover from '../InfoPopover';
 import InputHelperText from './InputHelperText';
@@ -23,7 +23,7 @@ interface Props {
 }
 
 const HistoryInputs = ({ variables, handleVariableChange, handleVariableErrors }: Props) => {
-    const { variablesConfig } = React.useContext(ConfigContext);
+    const [state] = React.useContext(StoreContext);
 
     const [infoPopover, updatedInfoPopover] = React.useState<{
         anchor: HTMLElement;
@@ -35,7 +35,7 @@ const HistoryInputs = ({ variables, handleVariableChange, handleVariableErrors }
 
     const historyFiles: CaseVariableConfig[] = [];
     const historyVariables: CaseVariableConfig[] = [];
-    variablesConfig.forEach((config) => {
+    state.variablesConfig.forEach((config) => {
         if (config.name.startsWith('hist_fincl')) {
             historyFiles.push(config);
         } else if (config.category === 'user_nl_clm_history_file') {
