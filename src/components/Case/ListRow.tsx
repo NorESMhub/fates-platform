@@ -117,6 +117,11 @@ const CaseListRow = ({ caseInfo, handleEdit, handleDelete }: Props) => {
                     </Typography>
                 </TableCell>
                 <TableCell align="center">
+                    <Typography component="span" variant="caption">
+                        {caseInfo.name || '-'}
+                    </Typography>
+                </TableCell>
+                <TableCell align="center">
                     <Stack direction="row" alignItems="center" spacing={1}>
                         <Typography component="span" variant="caption">
                             Create:
