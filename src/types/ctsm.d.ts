@@ -58,6 +58,7 @@ type CaseStatus =
     | 'CONFIGURED'
     | 'BUILDING'
     | 'BUILT'
+    | 'INPUT_DATA_READY'
     | 'SUBMITTED';
 
 type CTSMDriver = 'mct' | 'nuopc';
