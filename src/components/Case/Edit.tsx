@@ -2,14 +2,17 @@ import axios, { AxiosResponse } from 'axios';
 import React, { Fragment } from 'react';
 import makeStyles from '@mui/styles/makeStyles';
 import Alert from '@mui/material/Alert';
+import Autocomplete from '@mui/material/Autocomplete';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
+import FormControl from '@mui/material/FormControl';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
+import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 
 import { StoreContext } from '../../store';
@@ -42,7 +45,12 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
         };
     }, []);
 
-    const [activeTab, updateActiveTab] = React.useState<VariableCategory>('ctsm_xml');
+    const [activeTab, updateActiveTab] = React.useState<VariableCategory>('case');
+
+    const [caseInfo, updateCaseInfo] = React.useState<{ name: string; driver: CTSMDriver }>({
+        name: '',
+        driver: state.ctsmInfo?.drivers[0] || 'mct'
+    });
 
     const [variables, updateVariables] = React.useState(initialVariables);
     const [variablesErrors, updateVariablesErrors] = React.useState<{ [key: string]: boolean }>({});
@@ -111,8 +119,9 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
             .post<CaseWithTaskInfo, AxiosResponse<CaseWithTaskInfo>, CaseEditPayload>(`${API_PATH}/sites/`, {
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 site_name: state.selectedSite!.name,
+                case_name: caseInfo.name,
                 variables: preparedVariables,
-                driver: 'mct'
+                driver: caseInfo.driver
             })
             .then(({ data }) => {
                 dispatch({
@@ -147,12 +156,45 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
                     </Alert>
                 ) : null}
                 <Tabs value={activeTab} onChange={(_e, tab) => updateActiveTab(tab)}>
+                    <Tab label="Case" value="case" />
                     <Tab label="CTSM" value="ctsm_xml" />
                     <Tab label="Namelist - CLM" value="user_nl_clm" />
                     <Tab label="Namelist - CLM - History" value="user_nl_clm_history_file" />
                     <Tab label="FATES" value="fates" />
                 </Tabs>
                 <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1, justifyContent: 'space-evenly' }}>
+                    {activeTab === 'case' ? (
+                        <>
+                            <FormControl size="small" margin="normal">
+                                <TextField
+                                    label="Case Name"
+                                    size="small"
+                                    margin="dense"
+                                    value={caseInfo.name}
+                                    onChange={(e) =>
+                                        updateCaseInfo({
+                                            ...caseInfo,
+                                            name: e.target.value
+                                        })
+                                    }
+                                />
+                            </FormControl>
+                            <FormControl size="small" margin="normal">
+                                <Autocomplete
+                                    options={state.ctsmInfo?.drivers || []}
+                                    filterSelectedOptions
+                                    renderInput={(params) => <TextField {...params} size="small" margin="dense" />}
+                                    value={caseInfo.driver}
+                                    onChange={(_event, newValue) => {
+                                        updateCaseInfo({
+                                            ...caseInfo,
+                                            driver: newValue as CTSMDriver
+                                        });
+                                    }}
+                                />
+                            </FormControl>
+                        </>
+                    ) : null}
                     {state.variablesConfig
                         .filter(
                             (variableConfig) =>

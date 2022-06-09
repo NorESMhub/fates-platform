@@ -1,6 +1,7 @@
 interface CTSMInfo {
     model: string;
     version: string;
+    drivers: CTSMDriver[];
 }
 
 type VariableType = 'char' | 'integer' | 'float' | 'logical' | 'date';
@@ -20,7 +21,7 @@ interface VariableValidation {
     choices?: VariableChoice[];
 }
 
-type VariableCategory = 'ctsm_xml' | 'user_nl_clm' | 'user_nl_clm_history_file' | 'fates' | 'fates_param';
+type VariableCategory = 'case' | 'ctsm_xml' | 'user_nl_clm' | 'user_nl_clm_history_file' | 'fates' | 'fates_param';
 
 interface VariableDescription {
     summary: string;
@@ -57,12 +58,14 @@ type CaseStatus =
     | 'CONFIGURED'
     | 'BUILDING'
     | 'BUILT'
+    | 'INPUT_DATA_READY'
     | 'SUBMITTED';
 
 type CTSMDriver = 'mct' | 'nuopc';
 
 interface Case {
     id: string;
+    name?: string;
     compset: string;
     res: string;
     variables: CaseVariable[];
@@ -77,6 +80,7 @@ interface Case {
 
 interface CaseEditPayload {
     site_name: string;
+    case_name?: string;
     variables: CaseVariable[];
     driver: CTSMDriver;
 }

@@ -82,6 +82,20 @@ const Header = () => {
                             </Link>
                         </ListItem>
                         <ListItem>Version: {state.ctsmInfo?.version}</ListItem>
+                        {state.ctsmInfo?.drivers.length ? (
+                            <>
+                                <ListItem>Drivers:</ListItem>
+                                <List disablePadding>
+                                    {state.ctsmInfo?.drivers.map((driver) => (
+                                        <ListItem key={driver} sx={{ pl: 4 }}>
+                                            {driver}
+                                        </ListItem>
+                                    ))}
+                                </List>
+                            </>
+                        ) : (
+                            <ListItem>Drivers: -</ListItem>
+                        )}
                     </List>
                 </DialogContent>
             </Dialog>
