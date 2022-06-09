@@ -50,6 +50,7 @@ const SiteList = ({ site }: Props) => {
                         {(
                             [
                                 { label: 'Case ID' },
+                                { label: 'Name' },
                                 { label: 'Status' },
                                 { label: 'Date Created' },
                                 {
