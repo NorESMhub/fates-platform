@@ -157,9 +157,9 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
                 ) : null}
                 <Tabs value={activeTab} onChange={(_e, tab) => updateActiveTab(tab)}>
                     <Tab label="Case" value="case" />
-                    <Tab label="CTSM" value="ctsm_xml" />
-                    <Tab label="Namelist - CLM" value="user_nl_clm" />
-                    <Tab label="Namelist - CLM - History" value="user_nl_clm_history_file" />
+                    <Tab label="Run environment" value="ctsm_xml" />
+                    <Tab label="CLM namelist" value="user_nl_clm" />
+                    <Tab label="History files" value="user_nl_clm_history_file" />
                     <Tab label="FATES" value="fates" />
                 </Tabs>
                 <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1, justifyContent: 'space-evenly' }}>
