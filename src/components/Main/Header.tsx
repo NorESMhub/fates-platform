@@ -39,7 +39,7 @@ const Header = () => {
             >
                 <Toolbar>
                     <Typography sx={{ marginRight: 2, flexGrow: 1 }} variant="h4">
-                        FATES Platform
+                        NorESM Land Sites Platform
                     </Typography>
                     <IconButton
                         color="inherit"
