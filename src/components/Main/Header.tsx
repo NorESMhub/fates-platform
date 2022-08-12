@@ -61,13 +61,13 @@ const Header = () => {
                 <DialogContent>
                     <Typography>
                         Welcome to the &nbsp;
-                        <Link href="https://noresmhub.github.io/NorESM_LandSites_Platform/" target="_blank">
+                        <Link href="https://noresmhub.github.io/noresm-land-sites-platform/" target="_blank">
                             NorESM land sites platform
                         </Link>
                         .
                         <br />
                         Please see the&nbsp;
-                        <Link href="https://noresmhub.github.io/NorESM_LandSites_Platform/user_guide/" target="_blank">
+                        <Link href="https://noresmhub.github.io/noresm-land-sites-platform/user_guide/" target="_blank">
                             user guide
                         </Link>
                         &nbsp;for a guided tour of its contents and use.
