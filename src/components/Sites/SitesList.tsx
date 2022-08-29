@@ -42,9 +42,10 @@ const SitesList = ({ map }: Props) => {
         <>
             <Typography variant="h4">Sites</Typography>
             <Alert sx={{ m: 1 }} severity="info">
-                Start by selecting a site from the list below or on the map.
-                See also our <a href="https://noresmhub.github.io/noresm-land-sites-platform/user_guide/">User guide</a>,
-                <a href="https://noresmhub.github.io/noresm-land-sites-platform/">Technical documentation</a> and <a href="https://noresmhub.github.io/noresm-land-sites-platform/land-sites/">site overview</a>.
+                Start by selecting a site from the list below or on the map. See also our&nbsp;
+                <a href="https://noresmhub.github.io/noresm-land-sites-platform/user_guide/">User guide</a>,&nbsp;
+                <a href="https://noresmhub.github.io/noresm-land-sites-platform/">Technical documentation</a> and&nbsp;
+                <a href="https://noresmhub.github.io/noresm-land-sites-platform/land-sites/">site overview</a>.
             </Alert>
             {state.sites &&
                 state.sites.features.map(({ properties }) => (
