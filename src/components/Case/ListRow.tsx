@@ -5,9 +5,6 @@ import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import Link from '@mui/material/Link';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemText from '@mui/material/ListItemText';
 import LoadingButton from '@mui/lab/LoadingButton';
 import Stack from '@mui/material/Stack';
 import TableCell from '@mui/material/TableCell';
@@ -15,8 +12,8 @@ import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 
 import { StoreContext } from '../../store';
-import { renderVariableValue } from '../../utils/cases';
 import Status from './Status';
+import Variables from './Variables';
 
 interface Props {
     caseInfo: CaseWithTaskInfo;
@@ -188,20 +185,7 @@ const CaseListRow = ({ caseInfo, handleEdit, handleDelete }: Props) => {
             <Dialog open={showVariables} fullWidth maxWidth={false} onClose={() => updateShowVariables(false)}>
                 <DialogTitle>Variables</DialogTitle>
                 <DialogContent>
-                    <List dense disablePadding>
-                        {state.variablesConfig.map((variableConfig) => (
-                            <ListItem key={variableConfig.name}>
-                                <ListItemText
-                                    sx={{ pl: 0, display: 'flex' }}
-                                    primary={`${variableConfig.label || variableConfig.name}:`}
-                                    primaryTypographyProps={{ sx: { mr: 1 }, variant: 'caption' }}
-                                    secondary={renderVariableValue(caseInfo.variables, variableConfig)}
-                                    secondaryTypographyProps={{ component: 'span', variant: 'subtitle2' }}
-                                    inset
-                                />
-                            </ListItem>
-                        ))}
-                    </List>
+                    <Variables variables={caseInfo.variables} />
                 </DialogContent>
             </Dialog>
         </>

@@ -1,6 +1,9 @@
 import axios, { AxiosResponse } from 'axios';
 import React, { Fragment } from 'react';
 import makeStyles from '@mui/styles/makeStyles';
+import Accordion from '@mui/material/Accordion';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import AccordionSummary from '@mui/material/AccordionSummary';
 import Alert from '@mui/material/Alert';
 import Autocomplete from '@mui/material/Autocomplete';
 import Box from '@mui/material/Box';
@@ -10,8 +13,10 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import FormControl from '@mui/material/FormControl';
+import Icon from '@mui/material/Icon';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
+import TextareaAutosize from '@mui/material/TextareaAutosize';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 
@@ -114,6 +119,13 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
                 } as CaseVariable;
             })
             .filter((variable) => valueExists(variable.value));
+
+        if (variables.user_nl_clm_extra) {
+            preparedVariables.push({
+                name: 'user_nl_clm_extra',
+                value: variables.user_nl_clm_extra
+            });
+        }
 
         axios
             .post<CaseWithTaskInfo, AxiosResponse<CaseWithTaskInfo>, CaseEditPayload>(`${API_PATH}/sites/`, {
@@ -223,6 +235,35 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
                                 </React.Fragment>
                             );
                         })}
+                    {activeTab === 'user_nl_clm' ? (
+                        <Accordion>
+                            <AccordionSummary
+                                expandIcon={
+                                    <Icon baseClassName="icons" fontSize="inherit">
+                                        expand_more
+                                    </Icon>
+                                }
+                            >
+                                <Typography>Advance</Typography>
+                            </AccordionSummary>
+                            <AccordionDetails>
+                                <Alert severity="warning">
+                                    <Typography variant="subtitle2">
+                                        Use this on your own risk.
+                                        <br />
+                                        Each line must be a valid namelist entry. Invalid entries can cause the model to
+                                        fail.
+                                    </Typography>
+                                </Alert>
+                                <Typography sx={{ m: 1 }}>Extra CLM namelist entries</Typography>
+                                <TextareaAutosize
+                                    style={{ width: '100%' }}
+                                    minRows={7}
+                                    onChange={(e) => handleVariableChange('user_nl_clm_extra', e.target.value)}
+                                />
+                            </AccordionDetails>
+                        </Accordion>
+                    ) : null}
                     {activeTab === 'user_nl_clm_history_file' ? (
                         <HistoryInputs
                             variables={variables}

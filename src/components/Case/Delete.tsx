@@ -6,13 +6,10 @@ import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemText from '@mui/material/ListItemText';
 import Typography from '@mui/material/Typography';
 
 import { StoreContext } from '../../store';
-import { renderVariableValue } from '../../utils/cases';
+import Variables from './Variables';
 
 interface Props {
     caseInfo: CaseWithTaskInfo;
@@ -20,7 +17,7 @@ interface Props {
 }
 
 const CaseDelete = ({ caseInfo, handleClose }: Props) => {
-    const [state, dispatch] = React.useContext(StoreContext);
+    const [, dispatch] = React.useContext(StoreContext);
 
     const [errors, updateErrors] = React.useState<string>('');
 
@@ -56,20 +53,7 @@ const CaseDelete = ({ caseInfo, handleClose }: Props) => {
                 <Typography variant="body1">Grid: {caseInfo.res}</Typography>
                 <Typography variant="body1">Compset: {caseInfo.compset}</Typography>
                 <Typography variant="body1">Variables:</Typography>
-                <List dense disablePadding>
-                    {state.variablesConfig.map((variableConfig) => (
-                        <ListItem key={variableConfig.name} disableGutters disablePadding>
-                            <ListItemText
-                                sx={{ display: 'flex' }}
-                                primary={`${variableConfig.label || variableConfig.name}:`}
-                                primaryTypographyProps={{ sx: { mr: 1 }, variant: 'caption' }}
-                                secondary={renderVariableValue(caseInfo.variables, variableConfig)}
-                                secondaryTypographyProps={{ component: 'span', variant: 'subtitle2' }}
-                                inset
-                            />
-                        </ListItem>
-                    ))}
-                </List>
+                <Variables variables={caseInfo.variables} />
             </DialogContent>
             <DialogActions>
                 <Button variant="outlined" color="primary" onClick={handleClose}>
