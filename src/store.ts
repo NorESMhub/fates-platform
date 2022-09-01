@@ -9,8 +9,7 @@ export const initialState: State = {
     sitesBounds: new maplibre.LngLatBounds([-180, -90], [180, 90]),
     selectedSite: undefined,
     selectedSiteCases: undefined,
-    variablesConfig: [],
-    isEditingCase: false
+    variablesConfig: []
 };
 
 export const StoreContext = React.createContext<
@@ -90,12 +89,6 @@ export const reducers = (state: State, action: Action): State => {
             return {
                 ...state,
                 variablesConfig: action.vars
-            };
-        }
-        case 'updateCaseEditStatus': {
-            return {
-                ...state,
-                isEditingCase: action.isEditingCase
             };
         }
     }

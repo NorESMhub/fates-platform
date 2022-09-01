@@ -43,13 +43,6 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
 
     const [state, dispatch] = React.useContext(StoreContext);
 
-    React.useEffect(() => {
-        dispatch({ type: 'updateCaseEditStatus', isEditingCase: true });
-        return () => {
-            dispatch({ type: 'updateCaseEditStatus', isEditingCase: false });
-        };
-    }, []);
-
     const [activeTab, updateActiveTab] = React.useState<VariableCategory>('case');
 
     const [caseInfo, updateCaseInfo] = React.useState<{ name: string; driver: CTSMDriver }>({
@@ -259,6 +252,7 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
                                 <TextareaAutosize
                                     style={{ width: '100%' }}
                                     minRows={7}
+                                    value={variables.user_nl_clm_extra?.toString()}
                                     onChange={(e) => handleVariableChange('user_nl_clm_extra', e.target.value)}
                                 />
                             </AccordionDetails>

@@ -17,11 +17,12 @@ import Variables from './Variables';
 
 interface Props {
     caseInfo: CaseWithTaskInfo;
+    isBlocked: boolean;
     handleEdit: () => void;
     handleDelete: () => void;
 }
 
-const CaseListRow = ({ caseInfo, handleEdit, handleDelete }: Props) => {
+const CaseListRow = ({ caseInfo, isBlocked, handleEdit, handleDelete }: Props) => {
     const [state, dispatch] = React.useContext(StoreContext);
 
     const [showVariables, updateShowVariables] = React.useState(false);
@@ -31,6 +32,7 @@ const CaseListRow = ({ caseInfo, handleEdit, handleDelete }: Props) => {
         let intervalId: number;
 
         if (
+            !isBlocked &&
             state.selectedSite &&
             (!['SUCCESS', 'FAILURE', 'REVOKED'].includes(caseInfo.create_task.status || '') ||
                 (['BUILDING', 'BUILT'].includes(caseInfo.status) &&
@@ -65,7 +67,8 @@ const CaseListRow = ({ caseInfo, handleEdit, handleDelete }: Props) => {
         caseInfo.create_task.status,
         caseInfo.run_task.status,
         state.selectedSite,
-        state.selectedSiteCases
+        state.selectedSiteCases,
+        isBlocked
     ]);
 
     const handleRun = () => {

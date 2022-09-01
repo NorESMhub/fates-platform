@@ -5,7 +5,6 @@ interface State {
     selectedSite?: SiteProps;
     selectedSiteCases?: CaseWithTaskInfo[];
     variablesConfig: CaseVariableConfig[];
-    isEditingCase: boolean;
 }
 
 interface UpdateCTSMInfo {
@@ -43,11 +42,6 @@ interface UpdateVariablesConfig {
     vars: CaseVariableConfig[];
 }
 
-interface UpdateCaseEditStatus {
-    type: 'updateCaseEditStatus';
-    isEditingCase: boolean;
-}
-
 type Action =
     | UpdateCTSMInfo
     | UpdateSites
@@ -55,5 +49,4 @@ type Action =
     | UpdateSelectedSiteCases
     | UpdateSelectedSiteCase
     | DeleteSelectedSiteCase
-    | UpdateVariablesConfig
-    | UpdateCaseEditStatus;
+    | UpdateVariablesConfig;

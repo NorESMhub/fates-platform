@@ -25,6 +25,11 @@ const SiteList = ({ site }: Props) => {
 
     const [editCase, updatedEditCase] = React.useState<CaseWithTaskInfo | null>(null);
     const [deleteCase, updatedDeleteCase] = React.useState<CaseWithTaskInfo | null>(null);
+    const [isBlocked, updateIsBlocked] = React.useState(false);
+
+    React.useEffect(() => {
+        updateIsBlocked(editCase !== null || deleteCase !== null);
+    }, [editCase, deleteCase]);
 
     const [infoPopover, updatedInfoPopover] = React.useState<{
         anchor: HTMLElement;
@@ -103,6 +108,7 @@ const SiteList = ({ site }: Props) => {
                         <CaseListRow
                             key={caseInfo.create_task_id}
                             caseInfo={caseInfo}
+                            isBlocked={isBlocked}
                             handleEdit={() => updatedEditCase(caseInfo)}
                             handleDelete={() => updatedDeleteCase(caseInfo)}
                         />

@@ -70,9 +70,7 @@ const Content = (): JSX.Element => {
                         </Box>
                         <Divider />
                         <Box sx={{ flexGrow: 1, p: 1, overflow: 'auto' }}>
-                            {state.selectedSite && !state.isEditingCase ? (
-                                <CasesList site={state.selectedSite} />
-                            ) : null}
+                            {state.selectedSite ? <CasesList site={state.selectedSite} /> : null}
                         </Box>
                     </>
                 )}
