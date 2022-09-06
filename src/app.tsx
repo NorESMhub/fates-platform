@@ -2,8 +2,8 @@ import React, { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { StyledEngineProvider, ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import DateFnsAdapter from '@mui/lab/AdapterDateFns';
-import LocalizationProvider from '@mui/lab/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 
 import { StoreContext, initialState, reducers } from './store';
 import { theme } from './theme';
@@ -14,7 +14,7 @@ const App = (): JSX.Element => {
 
     return (
         <StrictMode>
-            <LocalizationProvider dateAdapter={DateFnsAdapter}>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <CssBaseline />
                 <StyledEngineProvider injectFirst>
                     <ThemeProvider theme={theme}>

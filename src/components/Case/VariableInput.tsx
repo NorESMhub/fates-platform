@@ -6,7 +6,7 @@ import FormControl from '@mui/material/FormControl';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormHelperText from '@mui/material/FormHelperText';
 import TextField from '@mui/material/TextField';
-import DatePicker from '@mui/lab/DatePicker';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
 import { StoreContext } from '../../store';
 import { valueExists } from '../../utils/cases';
@@ -103,7 +103,7 @@ const VariableInput = ({ variable, value, hideLabel, hideHelperText, onErrors, o
                     helperText={helperText}
                     size="small"
                     margin="dense"
-                    value={defaultValue}
+                    value={defaultValue?.toString()}
                 />
             </FormControl>
         );
@@ -230,7 +230,7 @@ const VariableInput = ({ variable, value, hideLabel, hideHelperText, onErrors, o
                                 placeholder: variable.placeholder
                             }
                         }}
-                        value={value || ''}
+                        value={value || defaultValue?.toString() || ''}
                         onChange={(e) => handleChange(e.target.value)}
                     />
                 </FormControl>
@@ -240,7 +240,7 @@ const VariableInput = ({ variable, value, hideLabel, hideHelperText, onErrors, o
                 <FormControl size="small" margin="normal">
                     <DatePicker
                         label={hideLabel ? null : label}
-                        inputFormat="yyyy-MM-dd"
+                        inputFormat="YYYY-MM-DD"
                         mask="____-__-__"
                         renderInput={(params) => (
                             <TextField
@@ -263,7 +263,7 @@ const VariableInput = ({ variable, value, hideLabel, hideHelperText, onErrors, o
                         )}
                         /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
                         // @ts-ignore-next-line
-                        value={value || defaultValue}
+                        value={value || defaultValue.toString()}
                         onChange={(v: Date | null) => {
                             handleChange(v);
                         }}

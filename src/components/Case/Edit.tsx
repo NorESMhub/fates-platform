@@ -1,6 +1,5 @@
 import axios, { AxiosResponse } from 'axios';
 import React, { Fragment } from 'react';
-import makeStyles from '@mui/styles/makeStyles';
 import Accordion from '@mui/material/Accordion';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
@@ -27,20 +26,12 @@ import FATESParamsInputs from './FATESParamsInputs';
 import HistoryInputs from './HistoryInputs';
 import VariableInput from './VariableInput';
 
-const useStyles = makeStyles({
-    dialogContainer: {
-        alignItems: 'flex-start'
-    }
-});
-
 interface Props {
     initialVariables: { [key: string]: VariableValue | undefined };
     handleClose: () => void;
 }
 
 const CaseEdit = ({ initialVariables, handleClose }: Props) => {
-    const classes = useStyles();
-
     const [state, dispatch] = React.useContext(StoreContext);
 
     const [activeTab, updateActiveTab] = React.useState<VariableCategory>('case');
@@ -141,14 +132,7 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
     };
 
     return (
-        <Dialog
-            classes={{ container: classes.dialogContainer }}
-            open
-            fullWidth
-            maxWidth={false}
-            scroll="paper"
-            onClose={handleClose}
-        >
+        <Dialog sx={{ alignItems: 'flex-start' }} open fullWidth maxWidth={false} scroll="paper" onClose={handleClose}>
             <DialogTitle>Create Case</DialogTitle>
             <DialogContent>
                 {serverErrors ? (
