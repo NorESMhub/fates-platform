@@ -11,6 +11,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { StoreContext } from '../../store';
 import { valueExists } from '../../utils/cases';
 import InputHelperText from './InputHelperText';
+import { Dayjs } from "dayjs";
 
 interface Props {
     variable: CaseVariableConfig;
@@ -264,8 +265,8 @@ const VariableInput = ({ variable, value, hideLabel, hideHelperText, onErrors, o
                         /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
                         // @ts-ignore-next-line
                         value={value || defaultValue.toString()}
-                        onChange={(v: Date | null) => {
-                            handleChange(v);
+                        onChange={(v: Dayjs | null) => {
+                            handleChange(v ? v.format('YYYY-MM-DD') : '');
                         }}
                     />
                 </FormControl>
