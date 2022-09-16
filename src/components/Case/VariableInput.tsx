@@ -267,34 +267,6 @@ const VariableInput = ({ variable, value, hideLabel, hideHelperText, onErrors, o
                         value={isDirty ? value : value || defaultValue?.toString()}
                         onChange={(e) => handleChange(e.target.value)}
                     />
-                    {/* <DatePicker */}
-                    {/*     label={hideLabel ? null : label} */}
-                    {/*     inputFormat="YYYY-MM-DD" */}
-                    {/*     mask="____-__-__" */}
-                    {/*     renderInput={(params) => ( */}
-                    {/*         <TextField */}
-                    {/*             {...params} */}
-                    {/*             error={hasErrors} */}
-                    {/*             variant="outlined" */}
-                    {/*             InputLabelProps={{ ...params.InputLabelProps, shrink: true }} */}
-                    {/*             InputProps={{ */}
-                    {/*                 ...params.InputProps, */}
-                    {/*                 notched: true, */}
-                    {/*                 inputProps: { */}
-                    {/*                     ...params.inputProps, */}
-                    {/*                     placeholder: variable.placeholder */}
-                    {/*                 } */}
-                    {/*             }} */}
-                    {/*             helperText={helperText} */}
-                    {/*             size="small" */}
-                    {/*             margin="dense" */}
-                    {/*         /> */}
-                    {/*     )} */}
-                    {/*     value={value || defaultValue.toString()} */}
-                    {/*     onChange={(v: Dayjs | null) => { */}
-                    {/*         handleChange(v ? v.format('YYYY-MM-DD') : ''); */}
-                    {/*     }} */}
-                    {/* /> */}
                 </FormControl>
             );
         case 'logical':
