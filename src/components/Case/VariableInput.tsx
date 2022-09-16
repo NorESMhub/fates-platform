@@ -1,4 +1,3 @@
-import { format as formatDate } from 'date-fns';
 import React from 'react';
 import Autocomplete from '@mui/material/Autocomplete';
 import Checkbox from '@mui/material/Checkbox';
@@ -6,12 +5,11 @@ import FormControl from '@mui/material/FormControl';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormHelperText from '@mui/material/FormHelperText';
 import TextField from '@mui/material/TextField';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
 import { StoreContext } from '../../store';
 import { valueExists } from '../../utils/cases';
+import DateInputMask from '../DateInput';
 import InputHelperText from './InputHelperText';
-import { Dayjs } from "dayjs";
 
 interface Props {
     variable: CaseVariableConfig;
@@ -24,6 +22,8 @@ interface Props {
 
 const VariableInput = ({ variable, value, hideLabel, hideHelperText, onErrors, onChange }: Props) => {
     const [state] = React.useContext(StoreContext);
+
+    const [isDirty, updateIsDirty] = React.useState(false);
 
     const [errors, updateErrors] = React.useState<string[]>([]);
     const hasErrors = errors.length > 0;
@@ -74,14 +74,22 @@ const VariableInput = ({ variable, value, hideLabel, hideHelperText, onErrors, o
                         }
                     }
                 } else if (type === 'date') {
-                    let newDate = v as Date | string | undefined;
-                    if (v) {
-                        if (v instanceof Date) {
-                            if (!Number.isNaN(v.valueOf())) {
-                                newDate = formatDate(v, 'yyyy-MM-dd');
-                            } else {
-                                variableErrors.push(`${label} must be a valid date`);
-                            }
+                    const newDate = v as string | undefined;
+                    if (newDate) {
+                        const [year, month, day] = newDate.split('-').map(Number);
+                        if (
+                            !year ||
+                            Number.isNaN(year) ||
+                            !month ||
+                            Number.isNaN(month) ||
+                            !day ||
+                            Number.isNaN(day) ||
+                            month < 1 ||
+                            month > 12 ||
+                            day < 1 ||
+                            day > 31
+                        ) {
+                            variableErrors.push(`${label} must be a valid date in YYYY-MM-DD format`);
                         }
                     }
                     changedValue = newDate;
@@ -93,6 +101,9 @@ const VariableInput = ({ variable, value, hideLabel, hideHelperText, onErrors, o
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         onChange(changedValue);
+        if (!isDirty) {
+            updateIsDirty(true);
+        }
     };
 
     if (variable.readonly) {
@@ -231,44 +242,59 @@ const VariableInput = ({ variable, value, hideLabel, hideHelperText, onErrors, o
                                 placeholder: variable.placeholder
                             }
                         }}
-                        value={value || defaultValue?.toString() || ''}
+                        value={isDirty ? value : value || defaultValue?.toString() || ''}
                         onChange={(e) => handleChange(e.target.value)}
                     />
                 </FormControl>
             );
         case 'date':
             return (
-                <FormControl size="small" margin="normal">
-                    <DatePicker
+                <FormControl size="small" margin="normal" error={hasErrors}>
+                    <TextField
+                        error={hasErrors}
                         label={hideLabel ? null : label}
-                        inputFormat="YYYY-MM-DD"
-                        mask="____-__-__"
-                        renderInput={(params) => (
-                            <TextField
-                                {...params}
-                                error={hasErrors}
-                                variant="outlined"
-                                InputLabelProps={{ ...params.InputLabelProps, shrink: true }}
-                                InputProps={{
-                                    ...params.InputProps,
-                                    notched: true,
-                                    inputProps: {
-                                        ...params.inputProps,
-                                        placeholder: variable.placeholder
-                                    }
-                                }}
-                                helperText={helperText}
-                                size="small"
-                                margin="dense"
-                            />
-                        )}
-                        /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
-                        // @ts-ignore-next-line
-                        value={value || defaultValue.toString()}
-                        onChange={(v: Dayjs | null) => {
-                            handleChange(v ? v.format('YYYY-MM-DD') : '');
+                        helperText={helperText}
+                        size="small"
+                        margin="dense"
+                        InputLabelProps={{ shrink: true }}
+                        InputProps={{
+                            notched: true,
+                            inputComponent: DateInputMask as any,
+                            inputProps: {
+                                placeholder: variable.placeholder
+                            }
                         }}
+                        value={isDirty ? value : value || defaultValue?.toString()}
+                        onChange={(e) => handleChange(e.target.value)}
                     />
+                    {/* <DatePicker */}
+                    {/*     label={hideLabel ? null : label} */}
+                    {/*     inputFormat="YYYY-MM-DD" */}
+                    {/*     mask="____-__-__" */}
+                    {/*     renderInput={(params) => ( */}
+                    {/*         <TextField */}
+                    {/*             {...params} */}
+                    {/*             error={hasErrors} */}
+                    {/*             variant="outlined" */}
+                    {/*             InputLabelProps={{ ...params.InputLabelProps, shrink: true }} */}
+                    {/*             InputProps={{ */}
+                    {/*                 ...params.InputProps, */}
+                    {/*                 notched: true, */}
+                    {/*                 inputProps: { */}
+                    {/*                     ...params.inputProps, */}
+                    {/*                     placeholder: variable.placeholder */}
+                    {/*                 } */}
+                    {/*             }} */}
+                    {/*             helperText={helperText} */}
+                    {/*             size="small" */}
+                    {/*             margin="dense" */}
+                    {/*         /> */}
+                    {/*     )} */}
+                    {/*     value={value || defaultValue.toString()} */}
+                    {/*     onChange={(v: Dayjs | null) => { */}
+                    {/*         handleChange(v ? v.format('YYYY-MM-DD') : ''); */}
+                    {/*     }} */}
+                    {/* /> */}
                 </FormControl>
             );
         case 'logical':
