@@ -1,4 +1,6 @@
-## FATES Platform
+## Graphical User Interface for the [NorESM-LSP](https://github.com/NorESMhub/noresm-land-sites-platform)
+
+This repository hosts a Dockerfile and source code for creating the Graphical User Interface of the [NorESM Land Sites Platform](https://noresmhub.github.io/noresm-land-sites-platform/).
 
 ### Setup
 
