@@ -13,3 +13,11 @@ export const renderVariableValue = (variables: CaseVariable[], variableConfig: C
     // @ts-ignore
     return value.toString();
 };
+
+export const isCaseRunning = (caseInfo: CaseWithTaskInfo): boolean => {
+    const running_statuses = ['PENDING', 'STARTED', 'RECEIVED', 'RETRY'];
+    return (
+        running_statuses.includes(caseInfo.create_task.status || '') ||
+        running_statuses.includes(caseInfo.run_task.status || '')
+    );
+};

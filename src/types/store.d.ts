@@ -1,10 +1,16 @@
 interface State {
+    isLoading: boolean;
     ctsmInfo?: CTSMInfo;
     sites?: Sites;
     sitesBounds: maplibregl.LngLatBoundsLike;
     selectedSite?: SiteProps;
-    selectedSiteCases?: CaseWithTaskInfo[];
+    cases: CaseWithTaskInfo[];
     variablesConfig: CaseVariableConfig[];
+}
+
+interface UpdateLoadingState {
+    type: 'updateLoadingState';
+    isLoading: boolean;
 }
 
 interface UpdateCTSMInfo {
@@ -22,18 +28,18 @@ interface UpdateSelectedSite {
     site?: SiteProps;
 }
 
-interface UpdateSelectedSiteCases {
-    type: 'updateSelectedSiteCases';
+interface UpdateCases {
+    type: 'updateCases';
     cases: CaseWithTaskInfo[];
 }
 
-interface UpdateSelectedSiteCase {
-    type: 'updateSelectedSiteCase';
+interface UpdateCase {
+    type: 'updateCase';
     case: CaseWithTaskInfo;
 }
 
-interface DeleteSelectedSiteCase {
-    type: 'deleteSelectedSiteCase';
+interface DeleteCase {
+    type: 'deleteCase';
     case: CaseWithTaskInfo;
 }
 
@@ -43,10 +49,11 @@ interface UpdateVariablesConfig {
 }
 
 type Action =
+    | UpdateLoadingState
     | UpdateCTSMInfo
     | UpdateSites
     | UpdateSelectedSite
-    | UpdateSelectedSiteCases
-    | UpdateSelectedSiteCase
-    | DeleteSelectedSiteCase
+    | UpdateCases
+    | UpdateCase
+    | DeleteCase
     | UpdateVariablesConfig;

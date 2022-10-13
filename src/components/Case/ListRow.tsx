@@ -12,6 +12,7 @@ import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 
 import { StoreContext } from '../../store';
+import { isCaseRunning } from '../../utils/cases';
 import Status from './Status';
 import Variables from './Variables';
 
@@ -31,14 +32,7 @@ const CaseListRow = ({ caseInfo, isBlocked, handleEdit, handleDelete }: Props) =
     React.useEffect(() => {
         let intervalId: number;
 
-        if (
-            !isBlocked &&
-            state.selectedSite &&
-            (!['SUCCESS', 'FAILURE', 'REVOKED'].includes(caseInfo.create_task.status || '') ||
-                (['BUILDING', 'BUILT'].includes(caseInfo.status) &&
-                    !['SUCCESS', 'FAILURE', 'REVOKED'].includes(caseInfo.run_task.status || '')))
-        ) {
-            // These are the unready states
+        if (!isBlocked && isCaseRunning(caseInfo)) {
             const checkStatus = () => {
                 axios.get<CaseWithTaskInfo>(`${API_PATH}/cases/${caseInfo.id}`).then(({ data }) => {
                     if (
@@ -48,7 +42,7 @@ const CaseListRow = ({ caseInfo, isBlocked, handleEdit, handleDelete }: Props) =
                     ) {
                         // Update the case task info
                         dispatch({
-                            type: 'updateSelectedSiteCase',
+                            type: 'updateCase',
                             case: data
                         });
                     }
@@ -67,7 +61,7 @@ const CaseListRow = ({ caseInfo, isBlocked, handleEdit, handleDelete }: Props) =
         caseInfo.create_task.status,
         caseInfo.run_task.status,
         state.selectedSite,
-        state.selectedSiteCases,
+        state.cases,
         isBlocked
     ]);
 
@@ -76,7 +70,7 @@ const CaseListRow = ({ caseInfo, isBlocked, handleEdit, handleDelete }: Props) =
             .post<CaseWithTaskInfo>(`${API_PATH}/cases/${caseInfo.id}/`)
             .then(({ data }) => {
                 dispatch({
-                    type: 'updateSelectedSiteCase',
+                    type: 'updateCase',
                     case: data
                 });
             })
@@ -122,6 +116,11 @@ const CaseListRow = ({ caseInfo, isBlocked, handleEdit, handleDelete }: Props) =
                     </Typography>
                 </TableCell>
                 <TableCell align="center">
+                    <Typography component="span" variant="caption">
+                        {caseInfo.site || '-'}
+                    </Typography>
+                </TableCell>
+                <TableCell align="center">
                     <Stack direction="row" alignItems="center" spacing={1}>
                         <Typography component="span" variant="caption">
                             Create:
@@ -138,11 +137,6 @@ const CaseListRow = ({ caseInfo, isBlocked, handleEdit, handleDelete }: Props) =
                 <TableCell align="center">
                     <Typography component="span" variant="caption">
                         {new Date(caseInfo.date_created).toLocaleString()}
-                    </Typography>
-                </TableCell>
-                <TableCell align="center">
-                    <Typography component="span" variant="caption">
-                        {caseInfo.res}
                     </Typography>
                 </TableCell>
                 <TableCell align="center">

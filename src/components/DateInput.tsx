@@ -33,25 +33,28 @@ const DateInputMask = React.forwardRef<HTMLElement, CustomProps>(function TextMa
                 }
             }}
             format={(date) => {
-                let day = date.getDate();
-                let month = date.getMonth() + 1;
-                let year = date.getFullYear();
+                const day = date.getDate();
+                let day_str = day.toString();
+                const month = date.getMonth() + 1;
+                let month_str = month.toString();
+                const year = date.getFullYear();
+                let year_str = year.toString();
 
                 if (day < 10) {
-                    day = `0${day}`;
+                    day_str = `0${day}`;
                 }
                 if (month < 10) {
-                    month = `0${month}`;
+                    month_str = `0${month}`;
                 }
                 if (year < 10) {
-                    year = `000${year}`;
+                    year_str = `000${year}`;
                 } else if (year < 100) {
-                    year = `00${year}`;
+                    year_str = `00${year}`;
                 } else if (year < 1000) {
-                    year = `0${year}`;
+                    year_str = `0${year}`;
                 }
 
-                return [year, month, day].join('-');
+                return [year_str, month_str, day_str].join('-');
             }}
             parse={(str) => {
                 const [year, month, day] = str.split('-').map(Number);

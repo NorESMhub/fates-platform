@@ -32,9 +32,21 @@ const Content = (): JSX.Element => {
             })
             .catch(console.error);
 
-        axios.get<CaseVariableConfig[]>(`${API_PATH}/cases/variables`).then(({ data }) => {
-            dispatch({ type: 'updateVariablesConfig', vars: data });
+        dispatch({
+            type: 'updateLoadingState',
+            isLoading: true
         });
+        axios
+            .get<CaseVariableConfig[]>(`${API_PATH}/cases/variables`)
+            .then(({ data }) => {
+                dispatch({ type: 'updateVariablesConfig', vars: data });
+            })
+            .finally(() => {
+                dispatch({
+                    type: 'updateLoadingState',
+                    isLoading: false
+                });
+            });
     }, []);
 
     return (
@@ -48,32 +60,28 @@ const Content = (): JSX.Element => {
                     height: `calc(100% - ${HEADER_HEIGHT}px)`
                 }}
             >
-                {!state.sites ? (
-                    <Loading />
-                ) : (
-                    <>
-                        <Box sx={{ display: 'flex', height: '50%' }}>
-                            <Box sx={{ width: '50%', overflowY: 'auto', p: 1 }}>
-                                {state.selectedSite ? (
-                                    <SiteDetails site={state.selectedSite} />
-                                ) : (
-                                    <SitesList map={mapRef.current} />
-                                )}
-                            </Box>
-                            <Box sx={{ flexGrow: 1 }}>
-                                <SitesMap
-                                    onMapReady={(map) => {
-                                        mapRef.current = map;
-                                    }}
-                                />
-                            </Box>
-                        </Box>
-                        <Divider />
-                        <Box sx={{ flexGrow: 1, p: 1, overflow: 'auto' }}>
-                            {state.selectedSite ? <CasesList site={state.selectedSite} /> : null}
-                        </Box>
-                    </>
-                )}
+                {state.isLoading ? <Loading /> : null}
+
+                <Box sx={{ display: 'flex', height: '50%' }}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', width: '50%', overflowY: 'auto', p: 1 }}>
+                        {state.selectedSite ? (
+                            <SiteDetails site={state.selectedSite} />
+                        ) : (
+                            <SitesList map={mapRef.current} />
+                        )}
+                    </Box>
+                    <Box sx={{ flexGrow: 1 }}>
+                        <SitesMap
+                            onMapReady={(map) => {
+                                mapRef.current = map;
+                            }}
+                        />
+                    </Box>
+                </Box>
+                <Divider />
+                <Box sx={{ flexGrow: 1, p: 1, overflow: 'auto' }}>
+                    <CasesList site={state.selectedSite} />
+                </Box>
             </Box>
         </>
     );

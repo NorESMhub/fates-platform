@@ -38,13 +38,17 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
 
     const [caseInfo, updateCaseInfo] = React.useState<{ name: string; driver: CTSMDriver }>({
         name: '',
-        driver: state.ctsmInfo?.drivers[0] || 'mct'
+        driver: state.ctsmInfo?.drivers[0] || 'nuopc'
     });
 
+    const [dataFile, updateDataFile] = React.useState<File | undefined>();
+
     const [variables, updateVariables] = React.useState(initialVariables);
-    const [variablesErrors, updateVariablesErrors] = React.useState<{ [key: string]: boolean }>({});
+    const [variablesErrors, updateVariablesErrors] = React.useState<{ [key: string]: string[] }>({});
 
     const [serverErrors, updateServerErrors] = React.useState<HTTPError>('');
+
+    const isCustomSite = !state.selectedSite;
 
     const pftIndexCount = state.selectedSite?.config?.find((v) => v.name === 'pft_index_count')?.value as
         | number
@@ -111,36 +115,103 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
             });
         }
 
-        axios
-            .post<CaseWithTaskInfo, AxiosResponse<CaseWithTaskInfo>, CaseEditPayload>(`${API_PATH}/sites/`, {
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                site_name: state.selectedSite!.name,
-                case_name: caseInfo.name,
-                variables: preparedVariables,
-                driver: caseInfo.driver
-            })
-            .then(({ data }) => {
-                dispatch({
-                    type: 'updateSelectedSiteCase',
-                    case: data
+        dispatch({
+            type: 'updateLoadingState',
+            isLoading: true
+        });
+        updateServerErrors('');
+        if (isCustomSite) {
+            const formData = new FormData();
+            formData.append(
+                'case_attrs',
+                JSON.stringify({
+                    name: caseInfo.name,
+                    driver: caseInfo.driver,
+                    compset: '2000_DATM%GSWP3v1_CLM51%FATES_SICE_SOCN_MOSART_SGLC_SWAV',
+                    variables: preparedVariables
+                })
+            );
+            formData.append('data_file', dataFile as File);
+            axios
+                .post<CaseWithTaskInfo, AxiosResponse<CaseWithTaskInfo>, FormData>(`${API_PATH}/cases/`, formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                })
+                .then(({ data }) => {
+                    dispatch({
+                        type: 'updateCase',
+                        case: data
+                    });
+                    handleClose();
+                })
+                .catch(({ response: { data } }) => {
+                    updateServerErrors(data);
+                })
+                .finally(() => {
+                    dispatch({
+                        type: 'updateLoadingState',
+                        isLoading: false
+                    });
                 });
-                handleClose();
-            })
-            .catch(({ response: { data } }) => {
-                updateServerErrors(data);
-            });
+        } else {
+            axios
+                .post<CaseWithTaskInfo, AxiosResponse<CaseWithTaskInfo>, CaseEditPayload>(`${API_PATH}/sites/`, {
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                    site_name: state.selectedSite!.name,
+                    case_name: caseInfo.name,
+                    variables: preparedVariables,
+                    driver: caseInfo.driver
+                })
+                .then(({ data }) => {
+                    dispatch({
+                        type: 'updateCase',
+                        case: data
+                    });
+                    handleClose();
+                })
+                .catch(({ response: { data } }) => {
+                    updateServerErrors(data);
+                })
+                .finally(() => {
+                    dispatch({
+                        type: 'updateLoadingState',
+                        isLoading: false
+                    });
+                });
+        }
     };
 
     return (
         <Dialog sx={{ alignItems: 'flex-start' }} open fullWidth maxWidth={false} scroll="paper" onClose={handleClose}>
             <DialogTitle>Create Case</DialogTitle>
             <DialogContent>
-                {serverErrors ? (
-                    <Alert severity="error" onClose={() => updateServerErrors('')}>
+                {isCustomSite && !dataFile ? (
+                    <Alert severity="warning">You must upload a data file to create a custom site.</Alert>
+                ) : null}
+                {isCustomSite && dataFile ? (
+                    <Alert
+                        severity="info"
+                        action={
+                            <Button color="inherit" size="small" onClick={() => updateDataFile(undefined)}>
+                                Remove
+                            </Button>
+                        }
+                    >
+                        Using {dataFile.name}
+                    </Alert>
+                ) : null}
+                {serverErrors || Object.values(variablesErrors).some((errors) => errors.length > 0) ? (
+                    <Alert severity="error">
                         <Typography variant="subtitle2">
                             {Array.isArray(serverErrors)
                                 ? serverErrors.map((error) => <Fragment key={error.msg}>{error.msg}</Fragment>)
                                 : serverErrors}
+                            {Object.entries(variablesErrors).map(([variableName, errors]) => (
+                                <Fragment key={variableName}>
+                                    {errors.map((error) => (
+                                        <Fragment key={error}>{error}</Fragment>
+                                    ))}
+                                </Fragment>
+                            ))}
                         </Typography>
                     </Alert>
                 ) : null}
@@ -201,10 +272,11 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
                                         key={variableConfig.name}
                                         variable={variableConfig}
                                         value={value}
+                                        errors={variablesErrors[variableConfig.name] || []}
                                         onErrors={(errors: string[]) =>
                                             updateVariablesErrors({
                                                 ...variablesErrors,
-                                                [variableConfig.name]: errors.length > 0
+                                                [variableConfig.name]: errors
                                             })
                                         }
                                         onChange={(newValue) => handleVariableChange(variableConfig.name, newValue)}
@@ -246,10 +318,10 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
                         <HistoryInputs
                             variables={variables}
                             handleVariableChange={handleVariableChange}
-                            handleVariableErrors={(name: string, hasError: boolean) =>
+                            handleVariableErrors={(name: string, errors: string[]) =>
                                 updateVariablesErrors({
                                     ...variablesErrors,
-                                    [name]: hasError
+                                    [name]: errors
                                 })
                             }
                         />
@@ -259,10 +331,10 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
                             pftIndexCount={pftIndexCount}
                             variables={variables}
                             handleVariableChange={handleVariableChange}
-                            handleVariableErrors={(name, hasError) => {
+                            handleVariableErrors={(name, errors) => {
                                 updateVariablesErrors({
                                     ...variablesErrors,
-                                    [name]: hasError
+                                    [name]: errors
                                 });
                             }}
                         />
@@ -270,13 +342,26 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
                 </Box>
             </DialogContent>
             <DialogActions>
+                {isCustomSite ? (
+                    <Button component="label" sx={{ mr: 1 }} variant="outlined" color="primary">
+                        Upload Data Zip File
+                        <input
+                            hidden
+                            accept="application/zip"
+                            type="file"
+                            onChange={(e) => updateDataFile(e.target.files?.[0])}
+                        />
+                    </Button>
+                ) : null}
                 <Button variant="outlined" color="secondary" onClick={handleClose}>
                     Cancel
                 </Button>
                 <Button
                     variant="outlined"
                     color="primary"
-                    disabled={Object.values(variablesErrors).some((hasError) => hasError)}
+                    disabled={
+                        (isCustomSite && !dataFile) || Object.values(variablesErrors).some((hasError) => hasError)
+                    }
                     onClick={handleSubmit}
                 >
                     Submit
