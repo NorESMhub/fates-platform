@@ -18,31 +18,7 @@ const SiteDetails = ({ site }: Props) => {
 
     return (
         <>
-            <Box sx={{ display: 'flex', justifyContent: 'space-evenly' }}>
-                <Button
-                    color="secondary"
-                    variant="outlined"
-                    onClick={() => dispatch({ type: 'updateSelectedSite', site: undefined })}
-                >
-                    Back
-                </Button>
-                <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'end' }}>
-                    <Button component="a" href={site.url} variant="outlined">
-                        Download Site Data
-                    </Button>
-                    <Button
-                        sx={{ ml: 1 }}
-                        variant="outlined"
-                        color="primary"
-                        disabled={editCase}
-                        onClick={() => updatedEditCase(true)}
-                    >
-                        Create Case
-                    </Button>
-                </Box>
-            </Box>
-
-            <Card sx={{ m: 1 }} elevation={0}>
+            <Card sx={{ m: 1, flexGrow: 1 }} elevation={0}>
                 <CardContent>
                     <Box sx={{ mb: 1 }}>
                         <Typography variant="h6">{site.name}</Typography>
@@ -58,14 +34,32 @@ const SiteDetails = ({ site }: Props) => {
                             {site.compset}
                         </Typography>
                     </Box>
-                    <Box sx={{ mb: 1 }}>
-                        <Typography variant="body1">Grid:</Typography>
-                        <Typography variant="caption" paragraph>
-                            {site.res}
-                        </Typography>
-                    </Box>
                 </CardContent>
             </Card>
+
+            <Box sx={{ display: 'flex', justifyContent: 'space-evenly' }}>
+                <Button
+                    color="secondary"
+                    variant="outlined"
+                    onClick={() => dispatch({ type: 'updateSelectedSite', site: undefined })}
+                >
+                    Back
+                </Button>
+                <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'end' }}>
+                    <Button component="a" href={site.data_url} variant="outlined">
+                        Download Site Data
+                    </Button>
+                    <Button
+                        sx={{ ml: 1 }}
+                        variant="outlined"
+                        color="primary"
+                        disabled={editCase}
+                        onClick={() => updatedEditCase(true)}
+                    >
+                        Create Case
+                    </Button>
+                </Box>
+            </Box>
             {editCase ? <CaseEdit initialVariables={{}} handleClose={() => updatedEditCase(false)} /> : null}
         </>
     );
