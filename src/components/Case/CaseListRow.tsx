@@ -56,14 +56,7 @@ const CaseListRow = ({ caseInfo, isBlocked, handleEdit, handleDelete }: Props) =
                 clearInterval(intervalId);
             }
         };
-    }, [
-        caseInfo.status,
-        caseInfo.create_task.status,
-        caseInfo.run_task.status,
-        state.selectedSite,
-        state.cases,
-        isBlocked
-    ]);
+    }, [caseInfo.status, caseInfo.create_task.status, caseInfo.run_task.status, state.selectedSite, isBlocked]);
 
     const handleRun = () => {
         axios

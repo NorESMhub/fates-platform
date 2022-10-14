@@ -6,7 +6,7 @@ import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 
 import { StoreContext } from '../../store';
-import CaseEdit from '../Case/Edit';
+import CaseEdit from '../Case/CaseEdit';
 
 interface Props {
     site: SiteProps;

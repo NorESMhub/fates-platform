@@ -1,4 +1,3 @@
-import axios from 'axios';
 import React from 'react';
 import Icon from '@mui/material/Icon';
 import IconButton from '@mui/material/IconButton';
@@ -11,16 +10,12 @@ import Typography from '@mui/material/Typography';
 
 import { StoreContext } from '../../store';
 import InfoPopover from '../InfoPopover';
-import CaseDelete from './Delete';
-import CaseEdit from './Edit';
-import CaseListRow from './ListRow';
+import CaseDelete from './CaseDelete';
+import CaseEdit from './CaseEdit';
+import CaseListRow from './CaseListRow';
 
-interface Props {
-    site?: SiteProps;
-}
-
-const SiteList = ({ site }: Props) => {
-    const [state, dispatch] = React.useContext(StoreContext);
+const CaseList = () => {
+    const [state] = React.useContext(StoreContext);
 
     const [editCase, updatedEditCase] = React.useState<CaseWithTaskInfo | null>(null);
     const [deleteCase, updatedDeleteCase] = React.useState<CaseWithTaskInfo | null>(null);
@@ -35,16 +30,6 @@ const SiteList = ({ site }: Props) => {
         text: string;
         url?: string;
     } | null>(null);
-
-    React.useEffect(() => {
-        const endpoint = site ? `sites/${site.name}/cases` : 'cases';
-        axios.get<CaseWithTaskInfo[]>(`${API_PATH}/${endpoint}`).then(({ data }) => {
-            dispatch({
-                type: 'updateCases',
-                cases: data
-            });
-        });
-    }, [site]);
 
     return (
         <>
@@ -139,4 +124,4 @@ const SiteList = ({ site }: Props) => {
     );
 };
 
-export default SiteList;
+export default CaseList;

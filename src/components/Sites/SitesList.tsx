@@ -6,7 +6,7 @@ import Chip from '@mui/material/Chip';
 import Typography from '@mui/material/Typography';
 
 import { StoreContext } from '../../store';
-import CaseEdit from '../Case/Edit';
+import CaseEdit from '../Case/CaseEdit';
 
 interface Props {
     map?: maplibregl.Map;

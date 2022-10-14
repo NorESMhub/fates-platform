@@ -1,7 +1,7 @@
 import maplibre from 'maplibre-gl';
 
-export const getSitesBounds = (sites: Sites) => {
-    const start = sites?.features[0]?.geometry.coordinates;
+export const getSitesBounds = (siteCollection: GeoJSON.FeatureCollection<GeoJSON.Point, SiteProps>[]) => {
+    const start = (siteCollection[0]?.features[0]?.geometry as GeoJSON.Point).coordinates;
 
     if (!start) {
         return new maplibre.LngLatBounds([-180, -90], [180, 90]);
@@ -11,8 +11,10 @@ export const getSitesBounds = (sites: Sites) => {
     const bounds = new maplibre.LngLatBounds(start, start);
 
     // Extend the 'LngLatBounds' to include every coordinate in the bounds result.
-    sites.features.forEach(({ geometry: { coordinates } }) => {
-        bounds.extend(coordinates);
+    siteCollection.forEach((site) => {
+        site.features.forEach(({ geometry: { coordinates } }) => {
+            bounds.extend(coordinates as maplibregl.LngLatLike);
+        });
     });
 
     return bounds;

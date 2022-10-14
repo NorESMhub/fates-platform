@@ -4,12 +4,12 @@ import BasemapsControl, { MapLibreBasemapsControlOptions } from 'maplibre-gl-bas
 import Box from '@mui/material/Box';
 import Icon from '@mui/material/Icon';
 
+import { StoreContext } from '../../store';
 import { MapControl } from './Control';
 import Help from './Help';
 
 interface Props {
     mapOptions: Partial<maplibregl.MapOptions>;
-    initialBounds: maplibregl.LngLatBoundsLike;
     attribution?: boolean;
     basemaps?: MapLibreBasemapsControlOptions;
     help?: boolean;
@@ -17,9 +17,12 @@ interface Props {
     onLoad: (map: maplibregl.Map) => void;
 }
 
-const Map = ({ mapOptions, initialBounds, attribution, basemaps, help, navigation, onLoad }: Props): JSX.Element => {
+const Map = ({ mapOptions, attribution, basemaps, help, navigation, onLoad }: Props): JSX.Element => {
+    const [state] = React.useContext(StoreContext);
+
     const mapContainerRef = React.useRef<HTMLDivElement>(null);
     const mapRef = React.useRef<maplibregl.Map>();
+    const boundsRef = React.useRef<maplibregl.LngLatBoundsLike>(state.sitesBounds);
 
     const resetPitchButtonRef = React.useRef<HTMLButtonElement>(null);
     const resetBoundsButtonRef = React.useRef<HTMLButtonElement>(null);
@@ -31,7 +34,7 @@ const Map = ({ mapOptions, initialBounds, attribution, basemaps, help, navigatio
         if (maplibre.supported() && mapContainerRef.current) {
             const map = new maplibre.Map({
                 container: mapContainerRef.current,
-                bounds: initialBounds,
+                bounds: state.sitesBounds,
                 attributionControl: !attribution,
                 ...mapOptions
             } as maplibregl.MapOptions);
@@ -65,6 +68,10 @@ const Map = ({ mapOptions, initialBounds, attribution, basemaps, help, navigatio
         }
     }, []);
 
+    React.useEffect(() => {
+        boundsRef.current = state.sitesBounds;
+    }, [state.sitesBounds]);
+
     return (
         <Box ref={mapContainerRef} sx={{ height: '100%', width: '100%' }}>
             {maplibre.supported() ? null : 'Your browser does not support the map features.'}
@@ -91,7 +98,7 @@ const Map = ({ mapOptions, initialBounds, attribution, basemaps, help, navigatio
                             title="Reset map bounds"
                             onClick={() => {
                                 if (mapRef.current) {
-                                    mapRef.current?.fitBounds(initialBounds, mapOptions.fitBoundsOptions || {});
+                                    mapRef.current?.fitBounds(boundsRef.current, mapOptions.fitBoundsOptions || {});
                                 }
                             }}
                         >
