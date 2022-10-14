@@ -50,9 +50,8 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
 
     const isCustomSite = !state.selectedSite;
 
-    const pftIndexCount = state.selectedSite?.config?.find((v) => v.name === 'pft_index_count')?.value as
-        | number
-        | undefined;
+    const pftIndexCount = (state.selectedSite?.config?.find((v) => v.name === 'pft_index_count')?.value ||
+        state.variablesConfig.find(({ name }) => name === 'pft_index_count')?.default) as number | undefined;
 
     React.useEffect(() => {
         if (!initialVariables.included_pft_indices) {
@@ -140,6 +139,14 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
                     dispatch({
                         type: 'updateCase',
                         case: data
+                    });
+                    dispatch({
+                        type: 'updateCustomSites',
+                        action: 'add',
+                        site: {
+                            lat: data.lat,
+                            lon: data.lon
+                        }
                     });
                     handleClose();
                 })
@@ -293,7 +300,7 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
                                     </Icon>
                                 }
                             >
-                                <Typography>Advance</Typography>
+                                <Typography>Advanced</Typography>
                             </AccordionSummary>
                             <AccordionDetails>
                                 <Alert severity="warning">
@@ -360,7 +367,8 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
                     variant="outlined"
                     color="primary"
                     disabled={
-                        (isCustomSite && !dataFile) || Object.values(variablesErrors).some((hasError) => hasError)
+                        (isCustomSite && !dataFile) ||
+                        Object.values(variablesErrors).some((errors) => errors.length > 0)
                     }
                     onClick={handleSubmit}
                 >

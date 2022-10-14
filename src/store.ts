@@ -7,6 +7,10 @@ export const initialState: State = {
     isLoading: false,
     ctsmInfo: undefined,
     sites: undefined,
+    customSites: {
+        type: 'FeatureCollection',
+        features: []
+    } as GeoJSON.FeatureCollection<GeoJSON.Point, SiteProps>,
     sitesBounds: new maplibre.LngLatBounds([-180, -90], [180, 90]),
     selectedSite: undefined,
     cases: [],
@@ -37,8 +41,53 @@ export const reducers = (state: State, action: Action): State => {
             return {
                 ...state,
                 sites: action.sites,
-                sitesBounds: getSitesBounds(action.sites)
+                sitesBounds: getSitesBounds([action.sites, state.customSites])
             };
+        case 'updateCustomSites': {
+            // Filter out the site if it already exists
+            const features = state.customSites.features.filter(({ geometry }) => {
+                const [lon, lat] = (geometry as GeoJSON.Point).coordinates;
+                return lon !== action.site.lon && lat !== action.site.lat;
+            });
+            if (action.action === 'add') {
+                const customSites = {
+                    type: 'FeatureCollection',
+                    features: features.concat({
+                        type: 'Feature',
+                        geometry: {
+                            type: 'Point',
+                            coordinates: [action.site.lon, action.site.lat]
+                        },
+                        properties: {}
+                    } as GeoJSON.Feature<GeoJSON.Point, SiteProps>)
+                } as GeoJSON.FeatureCollection<GeoJSON.Point, SiteProps>;
+                const sitesCollections = [customSites];
+                if (state.sites) {
+                    sitesCollections.push(state.sites);
+                }
+                return {
+                    ...state,
+                    customSites,
+                    sitesBounds: getSitesBounds(sitesCollections)
+                };
+            }
+            if (action.action === 'remove') {
+                const customSites = {
+                    type: 'FeatureCollection',
+                    features
+                } as GeoJSON.FeatureCollection<GeoJSON.Point, SiteProps>;
+                const sitesCollections = [customSites];
+                if (state.sites) {
+                    sitesCollections.push(state.sites);
+                }
+                return {
+                    ...state,
+                    customSites,
+                    sitesBounds: getSitesBounds(sitesCollections)
+                };
+            }
+            return state;
+        }
         case 'updateSelectedSite': {
             return {
                 ...state,
@@ -46,9 +95,27 @@ export const reducers = (state: State, action: Action): State => {
             };
         }
         case 'updateCases': {
+            const customSites = action.cases.reduce((features, { site, lat, lon }) => {
+                if (!site) {
+                    features.push({
+                        type: 'Feature',
+                        geometry: {
+                            type: 'Point',
+                            coordinates: [lon, lat]
+                        },
+                        properties: {}
+                    } as GeoJSON.Feature<GeoJSON.Point, SiteProps>);
+                }
+                return features;
+            }, [] as GeoJSON.Feature<GeoJSON.Point, SiteProps>[]);
+
             return {
                 ...state,
-                cases: action.cases
+                cases: action.cases,
+                customSites: {
+                    type: 'FeatureCollection',
+                    features: customSites
+                }
             };
         }
         case 'updateCase': {

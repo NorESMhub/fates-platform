@@ -107,23 +107,10 @@ interface CaseWithTaskInfo extends Case {
     run_task: Task;
 }
 
-interface SiteProps {
+interface SiteProps extends GeoJSON.GeoJsonProperties {
     name: string;
     description: ?string;
     compset: string;
     data_url: string;
     config?: CaseVariable[];
-}
-
-interface Sites {
-    type: 'FeatureCollection';
-    features: Array<{
-        type: 'Feature';
-        geometry: {
-            type: 'Point';
-            coordinates: [number, number];
-        };
-        properties: SiteProps;
-        id: string;
-    }>;
 }

@@ -5,7 +5,7 @@ import Divider from '@mui/material/Divider';
 
 import { StoreContext } from '../../store';
 import { HEADER_HEIGHT } from '../../theme';
-import CasesList from '../Case/List';
+import CasesList from '../Case/CaseList';
 import SiteDetails from '../Sites/SiteDetails';
 import SitesList from '../Sites/SitesList';
 import SitesMap from '../Sites/SitesMap';
@@ -26,11 +26,18 @@ const Content = (): JSX.Element => {
         });
 
         axios
-            .get<Sites>(`${API_PATH}/sites`)
+            .get<GeoJSON.FeatureCollection<GeoJSON.Point, SiteProps>>(`${API_PATH}/sites`)
             .then(({ data }) => {
                 dispatch({ type: 'updateSites', sites: data });
             })
             .catch(console.error);
+
+        axios.get<CaseWithTaskInfo[]>(`${API_PATH}/cases`).then(({ data }) => {
+            dispatch({
+                type: 'updateCases',
+                cases: data
+            });
+        });
 
         dispatch({
             type: 'updateLoadingState',
@@ -80,7 +87,7 @@ const Content = (): JSX.Element => {
                 </Box>
                 <Divider />
                 <Box sx={{ flexGrow: 1, p: 1, overflow: 'auto' }}>
-                    <CasesList site={state.selectedSite} />
+                    <CasesList />
                 </Box>
             </Box>
         </>

@@ -42,6 +42,7 @@ const SitesMap = ({ onMapReady }: Props) => {
         if (map && isMapLoaded && state.sitesBounds) {
             map.fitBounds(state.sitesBounds, { padding: 100 });
         }
+        refs.current.bounds = state.sitesBounds;
     }, [state.sitesBounds, isMapLoaded]);
 
     React.useEffect(() => {
@@ -54,21 +55,43 @@ const SitesMap = ({ onMapReady }: Props) => {
         }
     }, [state.sites, isMapLoaded]);
 
-    const onMapLoad = (map: maplibregl.Map) => {
-        map.addSource('sites', {
-            type: 'geojson',
-            data: {
-                type: 'FeatureCollection',
-                features: []
-            },
-            promoteId: 'name'
-        });
+    React.useEffect(() => {
+        const map = refs.current.map;
 
-        map.addLayer({
-            ...layerStyles.sites.default,
-            id: 'sites',
-            source: 'sites'
-        } as maplibregl.CircleLayerSpecification);
+        if (map && isMapLoaded) {
+            const customSitesSource = map.getSource('customSites') as maplibregl.GeoJSONSource;
+            if (customSitesSource) {
+                customSitesSource.setData(state.customSites);
+            }
+        }
+    }, [state.customSites, isMapLoaded]);
+
+    const onMapLoad = (map: maplibregl.Map) => {
+        ['sites', 'customSites'].forEach((sourceId) => {
+            map.addSource(sourceId, {
+                type: 'geojson',
+                data: {
+                    type: 'FeatureCollection',
+                    features: []
+                },
+                promoteId: 'name'
+            });
+
+            map.addLayer({
+                ...layerStyles.sites.default,
+                id: sourceId,
+                source: sourceId
+            } as maplibregl.CircleLayerSpecification);
+
+            map.on('mouseenter', sourceId, () => {
+                map.getCanvas().style.cursor = 'pointer';
+            });
+
+            // Change it back to a pointer when it leaves.
+            map.on('mouseleave', sourceId, () => {
+                map.getCanvas().style.cursor = '';
+            });
+        });
 
         map.on('click', 'sites', (e) => {
             if (e.features && e.features.length > 0) {
@@ -83,19 +106,11 @@ const SitesMap = ({ onMapReady }: Props) => {
             }
         });
 
-        map.on('mouseenter', 'sites', () => {
-            map.getCanvas().style.cursor = 'pointer';
-        });
-
-        // Change it back to a pointer when it leaves.
-        map.on('mouseleave', 'sites', () => {
-            map.getCanvas().style.cursor = '';
-        });
-
         refs.current.map = map;
         setIsMapLoaded(true);
         onMapReady(map);
     };
+
     return (
         <Map
             mapOptions={{
@@ -105,7 +120,6 @@ const SitesMap = ({ onMapReady }: Props) => {
                     padding: 100
                 }
             }}
-            initialBounds={refs.current.bounds}
             attribution
             basemaps={basemaps}
             help

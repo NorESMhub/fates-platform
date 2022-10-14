@@ -29,6 +29,16 @@ const CaseDelete = ({ caseInfo, handleClose }: Props) => {
                     type: 'deleteCase',
                     case: caseInfo
                 });
+                if (!caseInfo.site) {
+                    dispatch({
+                        type: 'updateCustomSites',
+                        action: 'remove',
+                        site: {
+                            lat: caseInfo.lat,
+                            lon: caseInfo.lon
+                        }
+                    });
+                }
                 handleClose();
             })
             .catch((err) => {

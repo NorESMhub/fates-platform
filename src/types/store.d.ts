@@ -1,7 +1,8 @@
 interface State {
     isLoading: boolean;
     ctsmInfo?: CTSMInfo;
-    sites?: Sites;
+    sites?: GeoJSON.FeatureCollection<GeoJSON.Point, SiteProps>;
+    customSites: GeoJSON.FeatureCollection<GeoJSON.Point, SiteProps>;
     sitesBounds: maplibregl.LngLatBoundsLike;
     selectedSite?: SiteProps;
     cases: CaseWithTaskInfo[];
@@ -21,6 +22,15 @@ interface UpdateCTSMInfo {
 interface UpdateSites {
     type: 'updateSites';
     sites: Sites;
+}
+
+interface UpdateCustomSites {
+    type: 'updateCustomSites';
+    action: 'add' | 'remove';
+    site: {
+        lat: number;
+        lon: number;
+    };
 }
 
 interface UpdateSelectedSite {
@@ -52,6 +62,7 @@ type Action =
     | UpdateLoadingState
     | UpdateCTSMInfo
     | UpdateSites
+    | UpdateCustomSites
     | UpdateSelectedSite
     | UpdateCases
     | UpdateCase
