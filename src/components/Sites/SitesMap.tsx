@@ -3,6 +3,7 @@ import React from 'react';
 import { StoreContext } from '../../store';
 import Map from '../Map';
 import { basemaps, layerStyles, mapStyle } from '../Map/styles';
+import SitesLegend from './SitesLegend';
 
 interface Refs {
     map?: maplibregl.Map;
@@ -78,19 +79,10 @@ const SitesMap = ({ onMapReady }: Props) => {
             });
 
             map.addLayer({
-                ...layerStyles.sites.default,
+                ...layerStyles[sourceId].default,
                 id: sourceId,
                 source: sourceId
             } as maplibregl.CircleLayerSpecification);
-
-            map.on('mouseenter', sourceId, () => {
-                map.getCanvas().style.cursor = 'pointer';
-            });
-
-            // Change it back to a pointer when it leaves.
-            map.on('mouseleave', sourceId, () => {
-                map.getCanvas().style.cursor = '';
-            });
         });
 
         map.on('click', 'sites', (e) => {
@@ -104,6 +96,15 @@ const SitesMap = ({ onMapReady }: Props) => {
                     site
                 });
             }
+        });
+
+        map.on('mouseenter', 'sites', () => {
+            map.getCanvas().style.cursor = 'pointer';
+        });
+
+        // Change it back to a pointer when it leaves.
+        map.on('mouseleave', 'sites', () => {
+            map.getCanvas().style.cursor = '';
         });
 
         refs.current.map = map;
@@ -124,6 +125,7 @@ const SitesMap = ({ onMapReady }: Props) => {
             basemaps={basemaps}
             help
             navigation
+            legends={<SitesLegend />}
             onLoad={onMapLoad}
         />
     );

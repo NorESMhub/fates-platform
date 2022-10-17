@@ -1,7 +1,7 @@
 interface State {
     isLoading: boolean;
     ctsmInfo?: CTSMInfo;
-    sites?: GeoJSON.FeatureCollection<GeoJSON.Point, SiteProps>;
+    sites: GeoJSON.FeatureCollection<GeoJSON.Point, SiteProps>;
     customSites: GeoJSON.FeatureCollection<GeoJSON.Point, SiteProps>;
     sitesBounds: maplibregl.LngLatBoundsLike;
     selectedSite?: SiteProps;

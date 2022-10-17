@@ -14,10 +14,11 @@ interface Props {
     basemaps?: MapLibreBasemapsControlOptions;
     help?: boolean;
     navigation?: boolean;
+    legends?: React.ReactElement;
     onLoad: (map: maplibregl.Map) => void;
 }
 
-const Map = ({ mapOptions, attribution, basemaps, help, navigation, onLoad }: Props): JSX.Element => {
+const Map = ({ mapOptions, attribution, basemaps, help, navigation, legends, onLoad }: Props): JSX.Element => {
     const [state] = React.useContext(StoreContext);
 
     const mapContainerRef = React.useRef<HTMLDivElement>(null);
@@ -29,6 +30,8 @@ const Map = ({ mapOptions, attribution, basemaps, help, navigation, onLoad }: Pr
 
     const helpButtonRef = React.useRef<HTMLButtonElement>(null);
     const [showHelp, updateShowHelp] = React.useState(false);
+
+    const legendsBoxRef = React.useRef<HTMLElement>(null);
 
     React.useEffect(() => {
         if (maplibre.supported() && mapContainerRef.current) {
@@ -59,6 +62,10 @@ const Map = ({ mapOptions, attribution, basemaps, help, navigation, onLoad }: Pr
 
             if (help && helpButtonRef.current) {
                 map.addControl(new MapControl(helpButtonRef.current), 'bottom-right');
+            }
+
+            if (legends && legendsBoxRef.current) {
+                map.addControl(new MapControl(legendsBoxRef.current), 'top-left');
             }
 
             map.on('load', () => {
@@ -114,6 +121,12 @@ const Map = ({ mapOptions, attribution, basemaps, help, navigation, onLoad }: Pr
                         <Icon baseClassName="icons">question_mark</Icon>
                     </button>
                     <Help open={showHelp} onClose={() => updateShowHelp(false)} />
+                </Box>
+            ) : null}
+
+            {legends ? (
+                <Box ref={legendsBoxRef} className="maplibregl-ctrl-group">
+                    {legends}
                 </Box>
             ) : null}
         </Box>
