@@ -6,7 +6,10 @@ import { getSitesBounds } from './utils/sites';
 export const initialState: State = {
     isLoading: false,
     ctsmInfo: undefined,
-    sites: undefined,
+    sites: {
+        type: 'FeatureCollection',
+        features: []
+    } as GeoJSON.FeatureCollection<GeoJSON.Point, SiteProps>,
     customSites: {
         type: 'FeatureCollection',
         features: []
@@ -61,14 +64,10 @@ export const reducers = (state: State, action: Action): State => {
                         properties: {}
                     } as GeoJSON.Feature<GeoJSON.Point, SiteProps>)
                 } as GeoJSON.FeatureCollection<GeoJSON.Point, SiteProps>;
-                const sitesCollections = [customSites];
-                if (state.sites) {
-                    sitesCollections.push(state.sites);
-                }
                 return {
                     ...state,
                     customSites,
-                    sitesBounds: getSitesBounds(sitesCollections)
+                    sitesBounds: getSitesBounds([state.sites, customSites])
                 };
             }
             if (action.action === 'remove') {
@@ -76,14 +75,10 @@ export const reducers = (state: State, action: Action): State => {
                     type: 'FeatureCollection',
                     features
                 } as GeoJSON.FeatureCollection<GeoJSON.Point, SiteProps>;
-                const sitesCollections = [customSites];
-                if (state.sites) {
-                    sitesCollections.push(state.sites);
-                }
                 return {
                     ...state,
                     customSites,
-                    sitesBounds: getSitesBounds(sitesCollections)
+                    sitesBounds: getSitesBounds([state.sites, customSites])
                 };
             }
             return state;
@@ -95,27 +90,28 @@ export const reducers = (state: State, action: Action): State => {
             };
         }
         case 'updateCases': {
-            const customSites = action.cases.reduce((features, { site, lat, lon }) => {
-                if (!site) {
-                    features.push({
-                        type: 'Feature',
-                        geometry: {
-                            type: 'Point',
-                            coordinates: [lon, lat]
-                        },
-                        properties: {}
-                    } as GeoJSON.Feature<GeoJSON.Point, SiteProps>);
-                }
-                return features;
-            }, [] as GeoJSON.Feature<GeoJSON.Point, SiteProps>[]);
+            const customSites = {
+                type: 'FeatureCollection',
+                features: action.cases.reduce((features, { site, lat, lon }) => {
+                    if (!site) {
+                        features.push({
+                            type: 'Feature',
+                            geometry: {
+                                type: 'Point',
+                                coordinates: [lon, lat]
+                            },
+                            properties: {}
+                        } as GeoJSON.Feature<GeoJSON.Point, SiteProps>);
+                    }
+                    return features;
+                }, [] as GeoJSON.Feature<GeoJSON.Point, SiteProps>[])
+            } as GeoJSON.FeatureCollection<GeoJSON.Point, SiteProps>;
 
             return {
                 ...state,
                 cases: action.cases,
-                customSites: {
-                    type: 'FeatureCollection',
-                    features: customSites
-                }
+                customSites,
+                sitesBounds: getSitesBounds([state.sites, customSites])
             };
         }
         case 'updateCase': {
