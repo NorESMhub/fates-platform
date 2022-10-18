@@ -13,6 +13,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import FormControl from '@mui/material/FormControl';
 import Icon from '@mui/material/Icon';
+import Stack from '@mui/material/Stack';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import TextareaAutosize from '@mui/material/TextareaAutosize';
@@ -191,37 +192,39 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
         <Dialog sx={{ alignItems: 'flex-start' }} open fullWidth maxWidth={false} scroll="paper" onClose={handleClose}>
             <DialogTitle>Create Case</DialogTitle>
             <DialogContent>
-                {isCustomSite && !dataFile ? (
-                    <Alert severity="warning">You must upload a data file to create a custom site.</Alert>
-                ) : null}
-                {isCustomSite && dataFile ? (
-                    <Alert
-                        severity="info"
-                        action={
-                            <Button color="inherit" size="small" onClick={() => updateDataFile(undefined)}>
-                                Remove
-                            </Button>
-                        }
-                    >
-                        Using {dataFile.name}
-                    </Alert>
-                ) : null}
-                {serverErrors || Object.values(variablesErrors).some((errors) => errors.length > 0) ? (
-                    <Alert severity="error">
-                        <Typography variant="subtitle2">
-                            {Array.isArray(serverErrors)
-                                ? serverErrors.map((error) => <Fragment key={error.msg}>{error.msg}</Fragment>)
-                                : serverErrors}
-                            {Object.entries(variablesErrors).map(([variableName, errors]) => (
-                                <Fragment key={variableName}>
-                                    {errors.map((error) => (
-                                        <Fragment key={error}>{error}</Fragment>
-                                    ))}
-                                </Fragment>
-                            ))}
-                        </Typography>
-                    </Alert>
-                ) : null}
+                <Stack spacing={1}>
+                    {isCustomSite && !dataFile ? (
+                        <Alert severity="warning">You must upload a data file to create a custom site.</Alert>
+                    ) : null}
+                    {isCustomSite && dataFile ? (
+                        <Alert
+                            severity="info"
+                            action={
+                                <Button color="inherit" size="small" onClick={() => updateDataFile(undefined)}>
+                                    Remove
+                                </Button>
+                            }
+                        >
+                            Using {dataFile.name}
+                        </Alert>
+                    ) : null}
+                    {serverErrors || Object.values(variablesErrors).some((errors) => errors.length > 0) ? (
+                        <Alert severity="error">
+                            <Typography variant="subtitle2">
+                                {Array.isArray(serverErrors)
+                                    ? serverErrors.map((error) => <Fragment key={error.msg}>{error.msg}</Fragment>)
+                                    : JSON.stringify(serverErrors)}
+                                {Object.entries(variablesErrors).map(([variableName, errors]) => (
+                                    <Fragment key={variableName}>
+                                        {errors.map((error) => (
+                                            <Fragment key={error}>{error}</Fragment>
+                                        ))}
+                                    </Fragment>
+                                ))}
+                            </Typography>
+                        </Alert>
+                    ) : null}
+                </Stack>
                 <Tabs value={activeTab} onChange={(_e, tab) => updateActiveTab(tab)}>
                     <Tab label="Case" value="case" />
                     <Tab label="Run environment" value="ctsm_xml" />

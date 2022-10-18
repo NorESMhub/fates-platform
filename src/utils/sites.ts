@@ -1,19 +1,18 @@
 import maplibre from 'maplibre-gl';
 
 export const getSitesBounds = (siteCollection: GeoJSON.FeatureCollection<GeoJSON.Point, SiteProps>[]) => {
-    const start = (siteCollection[0]?.features[0]?.geometry as GeoJSON.Point).coordinates;
+    // The default bounds, in case there are no sites.
+    let bounds = new maplibre.LngLatBounds([-180, -90], [180, 90]);
 
-    if (!start) {
-        return new maplibre.LngLatBounds([-180, -90], [180, 90]);
-    }
-
-    // Create a 'LngLatBounds' with both corners at the first coordinate.
-    const bounds = new maplibre.LngLatBounds(start, start);
-
-    // Extend the 'LngLatBounds' to include every coordinate in the bounds result.
-    siteCollection.forEach((site) => {
-        site.features.forEach(({ geometry: { coordinates } }) => {
-            bounds.extend(coordinates as maplibregl.LngLatLike);
+    siteCollection.forEach((site, sIdx) => {
+        site.features.forEach(({ geometry: { coordinates } }, fIdx) => {
+            if (sIdx === 0 && fIdx === 0) {
+                // Set the bounds to the first coordinate.
+                bounds = new maplibre.LngLatBounds(coordinates, coordinates);
+            } else {
+                // Extend the bounds to include the current coordinate.
+                bounds.extend(coordinates as maplibregl.LngLatLike);
+            }
         });
     });
 
