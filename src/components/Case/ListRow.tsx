@@ -177,7 +177,7 @@ const CaseListRow = ({ caseInfo, isBlocked, handleEdit, handleDelete }: Props) =
                             Download Results
                         </LoadingButton>
                         <Button variant="outlined" color="primary" size="small" onClick={handleEdit}>
-                            Edit
+                            Copy
                         </Button>
                         <Button variant="outlined" color="error" size="small" onClick={handleDelete}>
                             Delete
