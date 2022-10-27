@@ -12,7 +12,7 @@
     "lint:fix": "npm run lint -- --fix"
   },
   "author": "Kaveh Karimi <ka7eh@pm.me>",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "@emotion/react": "^11.10.4",
     "@emotion/styled": "^11.10.4",
