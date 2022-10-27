@@ -4,11 +4,19 @@ import maplibre from 'maplibre-gl';
 import { getSitesBounds } from './utils/sites';
 
 export const initialState: State = {
+    isLoading: false,
     ctsmInfo: undefined,
-    sites: undefined,
+    sites: {
+        type: 'FeatureCollection',
+        features: []
+    } as GeoJSON.FeatureCollection<GeoJSON.Point, SiteProps>,
+    customSites: {
+        type: 'FeatureCollection',
+        features: []
+    } as GeoJSON.FeatureCollection<GeoJSON.Point, SiteProps>,
     sitesBounds: new maplibre.LngLatBounds([-180, -90], [180, 90]),
     selectedSite: undefined,
-    selectedSiteCases: undefined,
+    cases: [],
     variablesConfig: []
 };
 
@@ -22,6 +30,11 @@ export const StoreContext = React.createContext<
 
 export const reducers = (state: State, action: Action): State => {
     switch (action.type) {
+        case 'updateLoadingState':
+            return {
+                ...state,
+                isLoading: action.isLoading
+            };
         case 'updateCTSMInfo':
             return {
                 ...state,
@@ -31,28 +44,84 @@ export const reducers = (state: State, action: Action): State => {
             return {
                 ...state,
                 sites: action.sites,
-                sitesBounds: getSitesBounds(action.sites)
+                sitesBounds: getSitesBounds([action.sites, state.customSites])
             };
+        case 'updateCustomSites': {
+            // Filter out the site if it already exists
+            const features = state.customSites.features.filter(({ geometry }) => {
+                const [lon, lat] = (geometry as GeoJSON.Point).coordinates;
+                return lon !== action.site.lon && lat !== action.site.lat;
+            });
+            if (action.action === 'add') {
+                const customSites = {
+                    type: 'FeatureCollection',
+                    features: features.concat({
+                        type: 'Feature',
+                        geometry: {
+                            type: 'Point',
+                            coordinates: [action.site.lon, action.site.lat]
+                        },
+                        properties: {}
+                    } as GeoJSON.Feature<GeoJSON.Point, SiteProps>)
+                } as GeoJSON.FeatureCollection<GeoJSON.Point, SiteProps>;
+                return {
+                    ...state,
+                    customSites,
+                    sitesBounds: getSitesBounds([state.sites, customSites])
+                };
+            }
+            if (action.action === 'remove') {
+                const customSites = {
+                    type: 'FeatureCollection',
+                    features
+                } as GeoJSON.FeatureCollection<GeoJSON.Point, SiteProps>;
+                return {
+                    ...state,
+                    customSites,
+                    sitesBounds: getSitesBounds([state.sites, customSites])
+                };
+            }
+            return state;
+        }
         case 'updateSelectedSite': {
             return {
                 ...state,
                 selectedSite: action.site
             };
         }
-        case 'updateSelectedSiteCases': {
+        case 'updateCases': {
+            const customSites = {
+                type: 'FeatureCollection',
+                features: action.cases.reduce((features, { site, lat, lon }) => {
+                    if (!site) {
+                        features.push({
+                            type: 'Feature',
+                            geometry: {
+                                type: 'Point',
+                                coordinates: [lon, lat]
+                            },
+                            properties: {}
+                        } as GeoJSON.Feature<GeoJSON.Point, SiteProps>);
+                    }
+                    return features;
+                }, [] as GeoJSON.Feature<GeoJSON.Point, SiteProps>[])
+            } as GeoJSON.FeatureCollection<GeoJSON.Point, SiteProps>;
+
             return {
                 ...state,
-                selectedSiteCases: action.cases
+                cases: action.cases,
+                customSites,
+                sitesBounds: getSitesBounds([state.sites, customSites])
             };
         }
-        case 'updateSelectedSiteCase': {
-            const cases = state.selectedSiteCases;
+        case 'updateCase': {
+            const cases = state.cases;
             if (cases) {
                 const editedCaseIdx = cases.findIndex((c) => c.id === action.case.id);
                 if (editedCaseIdx !== -1) {
                     return {
                         ...state,
-                        selectedSiteCases: cases
+                        cases: cases
                             .slice(0, editedCaseIdx)
                             .concat(action.case)
                             .concat(cases.slice(editedCaseIdx + 1))
@@ -60,7 +129,7 @@ export const reducers = (state: State, action: Action): State => {
                 }
                 return {
                     ...state,
-                    selectedSiteCases: [...cases, action.case]
+                    cases: [...cases, action.case]
                 };
             }
 
@@ -69,17 +138,17 @@ export const reducers = (state: State, action: Action): State => {
 
             return {
                 ...state,
-                selectedSiteCases: cases
+                cases
             };
         }
-        case 'deleteSelectedSiteCase': {
-            const cases = state.selectedSiteCases;
+        case 'deleteCase': {
+            const cases = state.cases;
             if (cases) {
                 const editedCaseIdx = cases.findIndex((c) => c.id === action.case.id);
                 if (editedCaseIdx !== -1) {
                     return {
                         ...state,
-                        selectedSiteCases: cases.slice(0, editedCaseIdx).concat(cases.slice(editedCaseIdx + 1))
+                        cases: cases.slice(0, editedCaseIdx).concat(cases.slice(editedCaseIdx + 1))
                     };
                 }
             }

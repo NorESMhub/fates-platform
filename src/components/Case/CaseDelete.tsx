@@ -26,9 +26,19 @@ const CaseDelete = ({ caseInfo, handleClose }: Props) => {
             .delete(`${API_PATH}/cases/${caseInfo.id}`)
             .then(() => {
                 dispatch({
-                    type: 'deleteSelectedSiteCase',
+                    type: 'deleteCase',
                     case: caseInfo
                 });
+                if (!caseInfo.site) {
+                    dispatch({
+                        type: 'updateCustomSites',
+                        action: 'remove',
+                        site: {
+                            lat: caseInfo.lat,
+                            lon: caseInfo.lon
+                        }
+                    });
+                }
                 handleClose();
             })
             .catch((err) => {
@@ -50,7 +60,6 @@ const CaseDelete = ({ caseInfo, handleClose }: Props) => {
                     Date Created: {new Date(caseInfo.date_created).toLocaleString()}
                 </Typography>
                 <Typography variant="body1">Status: {caseInfo.status}</Typography>
-                <Typography variant="body1">Grid: {caseInfo.res}</Typography>
                 <Typography variant="body1">Compset: {caseInfo.compset}</Typography>
                 <Typography variant="body1">Variables:</Typography>
                 <Variables variables={caseInfo.variables} />

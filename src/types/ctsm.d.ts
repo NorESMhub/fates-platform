@@ -49,33 +49,37 @@ interface CaseVariable {
     value: VariableValue;
 }
 
-type CaseStatus =
-    | 'INITIALISED'
-    | 'CREATED'
-    | 'SETUP'
-    | 'UPDATED'
-    | 'FATES INDICES SET'
-    | 'CONFIGURED'
+type CaseCreateStatus = 'INITIALISED' | 'CREATED' | 'SETUP' | 'UPDATED' | 'CONFIGURED';
+
+type CaseRUNStatus =
     | 'BUILDING'
     | 'BUILT'
     | 'INPUT_DATA_READY'
+    | 'REBUILT'
+    | 'FATES_PARAMS_UPDATED'
+    | 'FATES INDICES SET'
     | 'SUBMITTED';
+
+type CaseStatus = CaseCreateStatus | CaseRUNStatus;
 
 type CTSMDriver = 'mct' | 'nuopc';
 
 interface Case {
     id: string;
     name?: string;
-    compset: string;
-    res: string;
-    variables: CaseVariable[];
-    driver: CTSMDriver;
-    data_url: string;
+    site?: string;
     ctsm_tag: string;
     status: CaseStatus;
     date_created: string;
     create_task_id?: string;
     run_task_id?: string;
+    compset: string;
+    lat: number;
+    lon: number;
+    variables: CaseVariable[];
+    driver: CTSMDriver;
+    data_url?: string;
+    data_digest: string;
 }
 
 interface CaseEditPayload {
@@ -85,16 +89,11 @@ interface CaseEditPayload {
     driver: CTSMDriver;
 }
 
-type TaskStatus =
-    | 'PENDING'
-    | 'STARTED'
-    | 'SUCCESS'
-    | 'FAILURE'
-    | 'REVOKED'
-    | 'RECEIVED'
-    | 'REJECTED'
-    | 'RETRY'
-    | 'IGNORED';
+type TaskRunningStatus = 'PENDING' | 'STARTED' | 'RECEIVED' | 'RETRY';
+
+type TaskFinishedStatus = 'SUCCESS' | 'FAILURE' | 'REVOKED' | 'REJECTED' | 'IGNORED';
+
+type TaskStatus = TaskRunningStatus | TaskFinishedStatus;
 
 interface Task {
     task_id?: string;
@@ -108,24 +107,10 @@ interface CaseWithTaskInfo extends Case {
     run_task: Task;
 }
 
-interface SiteProps {
+interface SiteProps extends GeoJSON.GeoJsonProperties {
     name: string;
     description: ?string;
     compset: string;
-    res: string;
-    url: string;
+    data_url: string;
     config?: CaseVariable[];
-}
-
-interface Sites {
-    type: 'FeatureCollection';
-    features: Array<{
-        type: 'Feature';
-        geometry: {
-            type: 'Point';
-            coordinates: [number, number];
-        };
-        properties: SiteProps;
-        id: string;
-    }>;
 }

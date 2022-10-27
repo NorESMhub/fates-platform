@@ -1,10 +1,17 @@
 interface State {
+    isLoading: boolean;
     ctsmInfo?: CTSMInfo;
-    sites?: Sites;
+    sites: GeoJSON.FeatureCollection<GeoJSON.Point, SiteProps>;
+    customSites: GeoJSON.FeatureCollection<GeoJSON.Point, SiteProps>;
     sitesBounds: maplibregl.LngLatBoundsLike;
     selectedSite?: SiteProps;
-    selectedSiteCases?: CaseWithTaskInfo[];
+    cases: CaseWithTaskInfo[];
     variablesConfig: CaseVariableConfig[];
+}
+
+interface UpdateLoadingState {
+    type: 'updateLoadingState';
+    isLoading: boolean;
 }
 
 interface UpdateCTSMInfo {
@@ -17,23 +24,32 @@ interface UpdateSites {
     sites: Sites;
 }
 
+interface UpdateCustomSites {
+    type: 'updateCustomSites';
+    action: 'add' | 'remove';
+    site: {
+        lat: number;
+        lon: number;
+    };
+}
+
 interface UpdateSelectedSite {
     type: 'updateSelectedSite';
     site?: SiteProps;
 }
 
-interface UpdateSelectedSiteCases {
-    type: 'updateSelectedSiteCases';
+interface UpdateCases {
+    type: 'updateCases';
     cases: CaseWithTaskInfo[];
 }
 
-interface UpdateSelectedSiteCase {
-    type: 'updateSelectedSiteCase';
+interface UpdateCase {
+    type: 'updateCase';
     case: CaseWithTaskInfo;
 }
 
-interface DeleteSelectedSiteCase {
-    type: 'deleteSelectedSiteCase';
+interface DeleteCase {
+    type: 'deleteCase';
     case: CaseWithTaskInfo;
 }
 
@@ -43,10 +59,12 @@ interface UpdateVariablesConfig {
 }
 
 type Action =
+    | UpdateLoadingState
     | UpdateCTSMInfo
     | UpdateSites
+    | UpdateCustomSites
     | UpdateSelectedSite
-    | UpdateSelectedSiteCases
-    | UpdateSelectedSiteCase
-    | DeleteSelectedSiteCase
+    | UpdateCases
+    | UpdateCase
+    | DeleteCase
     | UpdateVariablesConfig;

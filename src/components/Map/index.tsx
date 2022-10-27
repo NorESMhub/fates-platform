@@ -4,22 +4,26 @@ import BasemapsControl, { MapLibreBasemapsControlOptions } from 'maplibre-gl-bas
 import Box from '@mui/material/Box';
 import Icon from '@mui/material/Icon';
 
+import { StoreContext } from '../../store';
 import { MapControl } from './Control';
 import Help from './Help';
 
 interface Props {
     mapOptions: Partial<maplibregl.MapOptions>;
-    initialBounds: maplibregl.LngLatBoundsLike;
     attribution?: boolean;
     basemaps?: MapLibreBasemapsControlOptions;
     help?: boolean;
     navigation?: boolean;
+    legends?: React.ReactElement;
     onLoad: (map: maplibregl.Map) => void;
 }
 
-const Map = ({ mapOptions, initialBounds, attribution, basemaps, help, navigation, onLoad }: Props): JSX.Element => {
+const Map = ({ mapOptions, attribution, basemaps, help, navigation, legends, onLoad }: Props): JSX.Element => {
+    const [state] = React.useContext(StoreContext);
+
     const mapContainerRef = React.useRef<HTMLDivElement>(null);
     const mapRef = React.useRef<maplibregl.Map>();
+    const boundsRef = React.useRef<maplibregl.LngLatBoundsLike>(state.sitesBounds);
 
     const resetPitchButtonRef = React.useRef<HTMLButtonElement>(null);
     const resetBoundsButtonRef = React.useRef<HTMLButtonElement>(null);
@@ -27,11 +31,13 @@ const Map = ({ mapOptions, initialBounds, attribution, basemaps, help, navigatio
     const helpButtonRef = React.useRef<HTMLButtonElement>(null);
     const [showHelp, updateShowHelp] = React.useState(false);
 
+    const legendsBoxRef = React.useRef<HTMLElement>(null);
+
     React.useEffect(() => {
         if (maplibre.supported() && mapContainerRef.current) {
             const map = new maplibre.Map({
                 container: mapContainerRef.current,
-                bounds: initialBounds,
+                bounds: state.sitesBounds,
                 attributionControl: !attribution,
                 ...mapOptions
             } as maplibregl.MapOptions);
@@ -58,12 +64,20 @@ const Map = ({ mapOptions, initialBounds, attribution, basemaps, help, navigatio
                 map.addControl(new MapControl(helpButtonRef.current), 'bottom-right');
             }
 
+            if (legends && legendsBoxRef.current) {
+                map.addControl(new MapControl(legendsBoxRef.current), 'top-left');
+            }
+
             map.on('load', () => {
                 onLoad(map);
             });
             mapRef.current = map;
         }
     }, []);
+
+    React.useEffect(() => {
+        boundsRef.current = state.sitesBounds;
+    }, [state.sitesBounds]);
 
     return (
         <Box ref={mapContainerRef} sx={{ height: '100%', width: '100%' }}>
@@ -91,7 +105,7 @@ const Map = ({ mapOptions, initialBounds, attribution, basemaps, help, navigatio
                             title="Reset map bounds"
                             onClick={() => {
                                 if (mapRef.current) {
-                                    mapRef.current?.fitBounds(initialBounds, mapOptions.fitBoundsOptions || {});
+                                    mapRef.current?.fitBounds(boundsRef.current, mapOptions.fitBoundsOptions || {});
                                 }
                             }}
                         >
@@ -107,6 +121,12 @@ const Map = ({ mapOptions, initialBounds, attribution, basemaps, help, navigatio
                         <Icon baseClassName="icons">question_mark</Icon>
                     </button>
                     <Help open={showHelp} onClose={() => updateShowHelp(false)} />
+                </Box>
+            ) : null}
+
+            {legends ? (
+                <Box ref={legendsBoxRef} className="maplibregl-ctrl-group">
+                    {legends}
                 </Box>
             ) : null}
         </Box>

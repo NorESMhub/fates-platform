@@ -3,6 +3,7 @@ import React from 'react';
 import { StoreContext } from '../../store';
 import Map from '../Map';
 import { basemaps, layerStyles, mapStyle } from '../Map/styles';
+import SitesLegend from './SitesLegend';
 
 interface Refs {
     map?: maplibregl.Map;
@@ -16,6 +17,7 @@ interface Props {
 
 const SitesMap = ({ onMapReady }: Props) => {
     const [state, dispatch] = React.useContext(StoreContext);
+    const [isMapLoaded, setIsMapLoaded] = React.useState(false);
 
     const refs = React.useRef<Refs>({
         map: undefined,
@@ -36,18 +38,52 @@ const SitesMap = ({ onMapReady }: Props) => {
         refs.current.selectedSite = state.selectedSite;
     }, [state.selectedSite]);
 
-    const onMapLoad = (map: maplibregl.Map) => {
-        map.addSource('sites', {
-            type: 'geojson',
-            data: state.sites,
-            promoteId: 'name'
-        });
+    React.useEffect(() => {
+        const map = refs.current.map;
+        if (map && isMapLoaded && state.sitesBounds) {
+            map.fitBounds(state.sitesBounds, { padding: 100 });
+        }
+        refs.current.bounds = state.sitesBounds;
+    }, [state.sitesBounds, isMapLoaded]);
 
-        map.addLayer({
-            ...layerStyles.sites.default,
-            id: 'sites',
-            source: 'sites'
-        } as maplibregl.CircleLayerSpecification);
+    React.useEffect(() => {
+        const map = refs.current.map;
+        if (map && isMapLoaded && state.sites) {
+            const sitesSource = map.getSource('sites') as maplibregl.GeoJSONSource;
+            if (sitesSource) {
+                sitesSource.setData(state.sites);
+            }
+        }
+    }, [state.sites, isMapLoaded]);
+
+    React.useEffect(() => {
+        const map = refs.current.map;
+
+        if (map && isMapLoaded) {
+            const customSitesSource = map.getSource('customSites') as maplibregl.GeoJSONSource;
+            if (customSitesSource) {
+                customSitesSource.setData(state.customSites);
+            }
+        }
+    }, [state.customSites, isMapLoaded]);
+
+    const onMapLoad = (map: maplibregl.Map) => {
+        ['sites', 'customSites'].forEach((sourceId) => {
+            map.addSource(sourceId, {
+                type: 'geojson',
+                data: {
+                    type: 'FeatureCollection',
+                    features: []
+                },
+                promoteId: 'name'
+            });
+
+            map.addLayer({
+                ...layerStyles[sourceId].default,
+                id: sourceId,
+                source: sourceId
+            } as maplibregl.CircleLayerSpecification);
+        });
 
         map.on('click', 'sites', (e) => {
             if (e.features && e.features.length > 0) {
@@ -72,8 +108,10 @@ const SitesMap = ({ onMapReady }: Props) => {
         });
 
         refs.current.map = map;
+        setIsMapLoaded(true);
         onMapReady(map);
     };
+
     return (
         <Map
             mapOptions={{
@@ -83,11 +121,11 @@ const SitesMap = ({ onMapReady }: Props) => {
                     padding: 100
                 }
             }}
-            initialBounds={refs.current.bounds}
             attribution
             basemaps={basemaps}
             help
             navigation
+            legends={<SitesLegend />}
             onLoad={onMapLoad}
         />
     );

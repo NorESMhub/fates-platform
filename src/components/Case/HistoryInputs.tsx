@@ -19,7 +19,7 @@ import VariableInput from './VariableInput';
 interface Props {
     variables: { [key: string]: VariableValue | undefined };
     handleVariableChange: (name: string, value?: VariableValue) => void;
-    handleVariableErrors: (name: string, hasError: boolean) => void;
+    handleVariableErrors: (name: string, errors: string[]) => void;
 }
 
 const HistoryInputs = ({ variables, handleVariableChange, handleVariableErrors }: Props) => {
@@ -105,12 +105,13 @@ const HistoryInputs = ({ variables, handleVariableChange, handleVariableErrors }
                                     variable={variableConfig}
                                     value={variables[variableConfig.name]}
                                     hideHelperText
+                                    errors={[]}
                                     onErrors={(errors: string[]) => {
                                         updateErrorMessages({
                                             ...errorMessages,
                                             [variableConfig.name]: errors
                                         });
-                                        handleVariableErrors(variableConfig.name, errors.length > 0);
+                                        handleVariableErrors(variableConfig.name, errors);
                                     }}
                                     onChange={(value) => {
                                         handleVariableChange(variableConfig.name, value);
@@ -168,12 +169,13 @@ const HistoryInputs = ({ variables, handleVariableChange, handleVariableErrors }
                                         }
                                         hideLabel
                                         hideHelperText
+                                        errors={[]}
                                         onErrors={(errors: string[]) => {
                                             updateErrorMessages({
                                                 ...errorMessages,
                                                 [variableConfig.name]: errors
                                             });
-                                            handleVariableErrors(variableConfig.name, errors.length > 0);
+                                            handleVariableErrors(variableConfig.name, errors);
                                         }}
                                         onChange={(value) => {
                                             handleHistoryVariableChange(

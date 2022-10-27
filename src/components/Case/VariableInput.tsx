@@ -16,16 +16,16 @@ interface Props {
     value?: VariableValue;
     hideLabel?: boolean;
     hideHelperText?: boolean;
+    errors: string[];
     onErrors: (errors: string[]) => void;
     onChange: (value?: VariableValue) => void;
 }
 
-const VariableInput = ({ variable, value, hideLabel, hideHelperText, onErrors, onChange }: Props) => {
+const VariableInput = ({ variable, value, hideLabel, hideHelperText, errors, onErrors, onChange }: Props) => {
     const [state] = React.useContext(StoreContext);
 
     const [isDirty, updateIsDirty] = React.useState(false);
 
-    const [errors, updateErrors] = React.useState<string[]>([]);
     const hasErrors = errors.length > 0;
 
     const defaultValue = state.selectedSite?.config?.find((v) => v.name === variable.name)?.value || variable.default;
@@ -96,7 +96,6 @@ const VariableInput = ({ variable, value, hideLabel, hideHelperText, onErrors, o
                 }
             });
         }
-        updateErrors(variableErrors);
         onErrors(variableErrors);
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore

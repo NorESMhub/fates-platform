@@ -18,7 +18,7 @@ interface Props {
     pftIndexCount: number;
     variables: { [key: string]: VariableValue | undefined };
     handleVariableChange: (name: string, value?: VariableValue) => void;
-    handleVariableErrors: (name: string, hasError: boolean) => void;
+    handleVariableErrors: (name: string, errors: string[]) => void;
 }
 
 const FATESParamsInputs = ({ pftIndexCount, variables, handleVariableChange, handleVariableErrors }: Props) => {
@@ -58,7 +58,7 @@ const FATESParamsInputs = ({ pftIndexCount, variables, handleVariableChange, han
             ...variablesErrors,
             [variableConfig.name]: hasErrors ? ['Only accepts number'] : []
         });
-        handleVariableErrors(variableConfig.name, hasErrors);
+        handleVariableErrors(variableConfig.name, hasErrors ? ['Error with FATES params'] : []);
 
         if (!hasErrors) {
             handleVariableChange(variableConfig.name, newValue as VariableValue);

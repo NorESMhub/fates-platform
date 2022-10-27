@@ -1,8 +1,6 @@
-import axios from 'axios';
 import React from 'react';
 import Icon from '@mui/material/Icon';
 import IconButton from '@mui/material/IconButton';
-import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -12,16 +10,12 @@ import Typography from '@mui/material/Typography';
 
 import { StoreContext } from '../../store';
 import InfoPopover from '../InfoPopover';
-import CaseDelete from './Delete';
-import CaseEdit from './Edit';
-import CaseListRow from './ListRow';
+import CaseDelete from './CaseDelete';
+import CaseEdit from './CaseEdit';
+import CaseListRow from './CaseListRow';
 
-interface Props {
-    site: SiteProps;
-}
-
-const SiteList = ({ site }: Props) => {
-    const [state, dispatch] = React.useContext(StoreContext);
+const CaseList = () => {
+    const [state] = React.useContext(StoreContext);
 
     const [editCase, updatedEditCase] = React.useState<CaseWithTaskInfo | null>(null);
     const [deleteCase, updatedDeleteCase] = React.useState<CaseWithTaskInfo | null>(null);
@@ -37,33 +31,21 @@ const SiteList = ({ site }: Props) => {
         url?: string;
     } | null>(null);
 
-    React.useEffect(() => {
-        axios.get<CaseWithTaskInfo[]>(`${API_PATH}/sites/${site.name}/cases`).then(({ data }) => {
-            dispatch({
-                type: 'updateSelectedSiteCases',
-                cases: data
-            });
-        });
-    }, [site.name]);
-
     return (
         <>
-            <Typography variant="h4">Cases:</Typography>
-            <Table>
+            <Typography variant="h4">
+                {state.selectedSite ? `Cases (${state.selectedSite.name}):` : 'Cases:'}
+            </Typography>
+            <Table size="small">
                 <TableHead>
                     <TableRow>
                         {(
                             [
                                 { label: 'Case ID' },
                                 { label: 'Name' },
+                                { label: 'Site' },
                                 { label: 'Status' },
                                 { label: 'Date Created' },
-                                {
-                                    label: 'Grid',
-                                    description: {
-                                        text: 'The size and site of your case. 1x1 denotes a single model grid cell.'
-                                    }
-                                },
                                 {
                                     label: 'Compset',
                                     description: {
@@ -79,40 +61,40 @@ const SiteList = ({ site }: Props) => {
                             ] as Array<{ label: string; description: { text: string; url?: string } }>
                         ).map(({ label, description }) => (
                             <TableCell key={label} align="center">
-                                <Stack direction="row" spacing={1}>
-                                    <Typography variant="h6">{label}</Typography>
-                                    {description ? (
-                                        <IconButton
-                                            size="small"
-                                            onClick={(e) =>
-                                                updatedInfoPopover({
-                                                    anchor: e.currentTarget,
-                                                    text: description.text,
-                                                    url: description.url
-                                                })
-                                            }
-                                        >
-                                            <Icon baseClassName="icons" fontSize="inherit">
-                                                info_outline
-                                            </Icon>
-                                        </IconButton>
-                                    ) : null}
-                                </Stack>
+                                {label}
+                                {description ? (
+                                    <IconButton
+                                        size="small"
+                                        onClick={(e) =>
+                                            updatedInfoPopover({
+                                                anchor: e.currentTarget,
+                                                text: description.text,
+                                                url: description.url
+                                            })
+                                        }
+                                    >
+                                        <Icon baseClassName="icons" fontSize="inherit">
+                                            info_outline
+                                        </Icon>
+                                    </IconButton>
+                                ) : null}
                             </TableCell>
                         ))}
                         <TableCell align="center" />
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {state.selectedSiteCases?.map((caseInfo) => (
-                        <CaseListRow
-                            key={caseInfo.create_task_id}
-                            caseInfo={caseInfo}
-                            isBlocked={isBlocked}
-                            handleEdit={() => updatedEditCase(caseInfo)}
-                            handleDelete={() => updatedDeleteCase(caseInfo)}
-                        />
-                    ))}
+                    {state.cases.map((caseInfo) =>
+                        !state.selectedSite || caseInfo.site === state.selectedSite.name ? (
+                            <CaseListRow
+                                key={caseInfo.create_task_id}
+                                caseInfo={caseInfo}
+                                isBlocked={isBlocked}
+                                handleEdit={() => updatedEditCase(caseInfo)}
+                                handleDelete={() => updatedDeleteCase(caseInfo)}
+                            />
+                        ) : null
+                    )}
                 </TableBody>
             </Table>
             {editCase ? (
@@ -142,4 +124,4 @@ const SiteList = ({ site }: Props) => {
     );
 };
 
-export default SiteList;
+export default CaseList;
