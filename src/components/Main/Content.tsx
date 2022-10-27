@@ -18,9 +18,9 @@ const Content = (): JSX.Element => {
     const mapRef = React.useRef<maplibregl.Map>();
 
     React.useEffect(() => {
-        axios.get<CTSMInfo>(`${API_PATH}/cases/ctsm-info`).then(({ data }) => {
+        axios.get<ModelInfo>(`${API_PATH}/cases/model-info`).then(({ data }) => {
             dispatch({
-                type: 'updateCTSMInfo',
+                type: 'updateModelInfo',
                 info: data
             });
         });

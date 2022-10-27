@@ -1,6 +1,6 @@
 interface State {
     isLoading: boolean;
-    ctsmInfo?: CTSMInfo;
+    modelInfo?: ModelInfo;
     sites: GeoJSON.FeatureCollection<GeoJSON.Point, SiteProps>;
     customSites: GeoJSON.FeatureCollection<GeoJSON.Point, SiteProps>;
     sitesBounds: maplibregl.LngLatBoundsLike;
@@ -14,9 +14,9 @@ interface UpdateLoadingState {
     isLoading: boolean;
 }
 
-interface UpdateCTSMInfo {
-    type: 'updateCTSMInfo';
-    info: CTSMInfo;
+interface UpdateModelInfo {
+    type: 'updateModelInfo';
+    info: ModelInfo;
 }
 
 interface UpdateSites {
@@ -60,7 +60,7 @@ interface UpdateVariablesConfig {
 
 type Action =
     | UpdateLoadingState
-    | UpdateCTSMInfo
+    | UpdateModelInfo
     | UpdateSites
     | UpdateCustomSites
     | UpdateSelectedSite

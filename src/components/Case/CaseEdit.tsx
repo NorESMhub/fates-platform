@@ -37,9 +37,9 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
 
     const [activeTab, updateActiveTab] = React.useState<VariableCategory>('case');
 
-    const [caseInfo, updateCaseInfo] = React.useState<{ name: string; driver: CTSMDriver }>({
+    const [caseInfo, updateCaseInfo] = React.useState<{ name: string; driver: ModelDriver }>({
         name: '',
-        driver: state.ctsmInfo?.drivers[0] || 'nuopc'
+        driver: state.modelInfo?.drivers[0] || 'nuopc'
     });
 
     const [dataFile, updateDataFile] = React.useState<File | undefined>();
@@ -227,7 +227,7 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
                 </Stack>
                 <Tabs value={activeTab} onChange={(_e, tab) => updateActiveTab(tab)}>
                     <Tab label="Case" value="case" />
-                    <Tab label="Run environment" value="ctsm_xml" />
+                    <Tab label="Run environment" value="xml_var" />
                     <Tab label="CLM namelist" value="user_nl_clm" />
                     <Tab label="History files" value="user_nl_clm_history_file" />
                     <Tab label="FATES" value="fates" />
@@ -251,14 +251,14 @@ const CaseEdit = ({ initialVariables, handleClose }: Props) => {
                             </FormControl>
                             <FormControl size="small" margin="normal">
                                 <Autocomplete
-                                    options={state.ctsmInfo?.drivers || []}
+                                    options={state.modelInfo?.drivers || []}
                                     filterSelectedOptions
                                     renderInput={(params) => <TextField {...params} size="small" margin="dense" />}
                                     value={caseInfo.driver}
                                     onChange={(_event, newValue) => {
                                         updateCaseInfo({
                                             ...caseInfo,
-                                            driver: newValue as CTSMDriver
+                                            driver: newValue as ModelDriver
                                         });
                                     }}
                                 />

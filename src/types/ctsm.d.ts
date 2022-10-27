@@ -1,7 +1,7 @@
-interface CTSMInfo {
+interface ModelInfo {
     model: string;
     version: string;
-    drivers: CTSMDriver[];
+    drivers: ModelDriver[];
 }
 
 type VariableType = 'char' | 'integer' | 'float' | 'logical' | 'date';
@@ -21,7 +21,7 @@ interface VariableValidation {
     choices?: VariableChoice[];
 }
 
-type VariableCategory = 'case' | 'ctsm_xml' | 'user_nl_clm' | 'user_nl_clm_history_file' | 'fates' | 'fates_param';
+type VariableCategory = 'case' | 'xml_var' | 'user_nl_clm' | 'user_nl_clm_history_file' | 'fates' | 'fates_param';
 
 interface VariableDescription {
     summary: string;
@@ -62,13 +62,13 @@ type CaseRUNStatus =
 
 type CaseStatus = CaseCreateStatus | CaseRUNStatus;
 
-type CTSMDriver = 'mct' | 'nuopc';
+type ModelDriver = 'mct' | 'nuopc';
 
 interface Case {
     id: string;
     name?: string;
     site?: string;
-    ctsm_tag: string;
+    model_version: string;
     status: CaseStatus;
     date_created: string;
     create_task_id?: string;
@@ -77,7 +77,7 @@ interface Case {
     lat: number;
     lon: number;
     variables: CaseVariable[];
-    driver: CTSMDriver;
+    driver: ModelDriver;
     data_url?: string;
     data_digest: string;
 }
@@ -86,7 +86,7 @@ interface CaseEditPayload {
     site_name: string;
     case_name?: string;
     variables: CaseVariable[];
-    driver: CTSMDriver;
+    driver: ModelDriver;
 }
 
 type TaskRunningStatus = 'PENDING' | 'STARTED' | 'RECEIVED' | 'RETRY';

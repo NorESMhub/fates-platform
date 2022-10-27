@@ -5,7 +5,7 @@ import { getSitesBounds } from './utils/sites';
 
 export const initialState: State = {
     isLoading: false,
-    ctsmInfo: undefined,
+    modelInfo: undefined,
     sites: {
         type: 'FeatureCollection',
         features: []
@@ -35,10 +35,10 @@ export const reducers = (state: State, action: Action): State => {
                 ...state,
                 isLoading: action.isLoading
             };
-        case 'updateCTSMInfo':
+        case 'updateModelInfo':
             return {
                 ...state,
-                ctsmInfo: action.info
+                modelInfo: action.info
             };
         case 'updateSites':
             return {

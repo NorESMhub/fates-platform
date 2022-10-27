@@ -73,20 +73,20 @@ const Header = () => {
                         &nbsp;for a guided tour of its contents and use.
                     </Typography>
                     <Divider sx={{ m: 2 }} />
-                    <Typography variant="subtitle2">CTSM Info:</Typography>
+                    <Typography variant="subtitle2">Model Info:</Typography>
                     <List>
                         <ListItem>
                             Repo:&nbsp;
-                            <Link href={state.ctsmInfo?.model} target="_blank">
-                                {state.ctsmInfo?.model}
+                            <Link href={state.modelInfo?.model} target="_blank">
+                                {state.modelInfo?.model}
                             </Link>
                         </ListItem>
-                        <ListItem>Version: {state.ctsmInfo?.version}</ListItem>
-                        {state.ctsmInfo?.drivers.length ? (
+                        <ListItem>Version: {state.modelInfo?.version}</ListItem>
+                        {state.modelInfo?.drivers.length ? (
                             <>
                                 <ListItem>Drivers:</ListItem>
                                 <List disablePadding>
-                                    {state.ctsmInfo?.drivers.map((driver) => (
+                                    {state.modelInfo?.drivers.map((driver) => (
                                         <ListItem key={driver} sx={{ pl: 4 }}>
                                             {driver}
                                         </ListItem>
