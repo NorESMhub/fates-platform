@@ -107,7 +107,8 @@ const App = (): JSX.Element => {
                                 <Icon baseClassName="icons" fontSize="small" color="error">
                                     error_outline
                                 </Icon>
-                                Cannot connect to API
+                                Cannot connect to API.&nbsp;
+                                Try again in a few minutes. If the error persists, check the state of API docker service.
                             </Box>
                         ) : (
                             <Content />
