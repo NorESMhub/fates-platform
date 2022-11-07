@@ -49,6 +49,24 @@ const Header = () => {
                     >
                         <Icon baseClassName="icons">info</Icon>
                     </IconButton>
+                    <IconButton
+                        component={Link}
+                        color="inherit"
+                        href="https://noresmhub.github.io/noresm-land-sites-platform/"
+                        target="_blank"
+                        referrerPolicy="no-referrer"
+                    >
+                        <Icon baseClassName="icons">description</Icon>
+                    </IconButton>
+                    <IconButton
+                        component={Link}
+                        color="inherit"
+                        href="https://github.com/noresmhub/noresm-land-sites-platform/"
+                        target="_blank"
+                        referrerPolicy="no-referrer"
+                    >
+                        <Icon baseClassName="icons">code</Icon>
+                    </IconButton>
                 </Toolbar>
             </AppBar>
             <Dialog
