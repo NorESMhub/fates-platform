@@ -1,6 +1,7 @@
 import React from 'react';
 import Box from '@mui/material/Box';
 import Checkbox from '@mui/material/Checkbox';
+import FormControlLabel from '@mui/material/FormControlLabel';
 import FormHelperText from '@mui/material/FormHelperText';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -13,6 +14,57 @@ import Typography from '@mui/material/Typography';
 import { StoreContext } from '../../store';
 import { valueExists } from '../../utils/cases';
 import InputHelperText from './InputHelperText';
+
+const PFT_INDEX_LABELS: { [index: number]: { long_name: string; group: string } } = {
+    1: {
+        long_name: 'Broadleaf evergreen tropical tree',
+        group: 'tree'
+    },
+    2: {
+        long_name: 'Needleleaf evergreen extratropical tree',
+        group: 'tree'
+    },
+    3: {
+        long_name: 'Needleleaf cold-deciduous extratropical tree',
+        group: 'tree'
+    },
+    4: {
+        long_name: 'Broadleaf evergreen extratropical tree',
+        group: 'tree'
+    },
+    5: {
+        long_name: 'Broadleaf hydro-deciduous tropical tree',
+        group: 'tree'
+    },
+    6: {
+        long_name: 'Broadleaf cold-deciduous extratropical tree',
+        group: 'tree'
+    },
+    7: {
+        long_name: 'Broadleaf evergreen extratropical shrub',
+        group: 'shrub'
+    },
+    8: {
+        long_name: 'Broadleaf hydro-deciduous extratropical shrub',
+        group: 'shrub'
+    },
+    9: {
+        long_name: 'Broadleaf cold-deciduous extratropical shrub',
+        group: 'shrub'
+    },
+    10: {
+        long_name: 'Arctic C3 grass',
+        group: 'grass'
+    },
+    11: {
+        long_name: 'Cool C3 grass',
+        group: 'grass'
+    },
+    12: {
+        long_name: 'C4 grass',
+        group: 'grass'
+    }
+};
 
 interface Props {
     pftIndexCount: number;
@@ -77,20 +129,32 @@ const FATESParamsInputs = ({ pftIndexCount, variables, handleVariableChange, han
                         {[...Array(pftIndexCount).keys()].map((idx) => {
                             const idxStr = (idx + 1).toString(10);
                             return (
-                                <TableCell key={idx} align="center" size="small">
-                                    <Checkbox
-                                        checked={(variables.included_pft_indices as string[]).includes(idxStr)}
-                                        onChange={(e) => {
-                                            const newValue = new Set(variables.included_pft_indices as string[]);
-                                            if (e.target.checked) {
-                                                newValue.add(idxStr);
-                                            } else {
-                                                newValue.delete(idxStr);
-                                            }
-                                            handleVariableChange('included_pft_indices', Array.from(newValue));
+                                <TableCell key={idx} align="center" size="small" padding="none">
+                                    <FormControlLabel
+                                        componentsProps={{
+                                            typography: { sx: { fontSize: '0.8rem' } }
                                         }}
+                                        value="top"
+                                        control={
+                                            <Checkbox
+                                                size="small"
+                                                checked={(variables.included_pft_indices as string[]).includes(idxStr)}
+                                                onChange={(e) => {
+                                                    const newValue = new Set(
+                                                        variables.included_pft_indices as string[]
+                                                    );
+                                                    if (e.target.checked) {
+                                                        newValue.add(idxStr);
+                                                    } else {
+                                                        newValue.delete(idxStr);
+                                                    }
+                                                    handleVariableChange('included_pft_indices', Array.from(newValue));
+                                                }}
+                                            />
+                                        }
+                                        label={PFT_INDEX_LABELS[idx + 1].long_name}
+                                        labelPlacement="top"
                                     />
-                                    {idx + 1}
                                 </TableCell>
                             );
                         })}
